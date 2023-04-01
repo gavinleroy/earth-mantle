@@ -4,4 +4,13 @@
 
 TODO: everything else
 
+Run code:
+```shell
+cd build
+
+cmake ..
+
+make -j && ./earth-mantle
+```
+
 :beers:
