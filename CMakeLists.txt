@@ -3,14 +3,14 @@ cmake_minimum_required(VERSION 3.18)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-PROJECT(crtbp)
+PROJECT(earth-mantle)
 
 # depends on vtk
 find_package(VTK REQUIRED)
 
 # find sources
 file(GLOB SRCFILES *.cpp)
-file(GLOB HPPFILES *.hpp)
+file(GLOB HPPFILES *.h)
 
 # create project
 add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SRCFILES} ${HPPFILES})
