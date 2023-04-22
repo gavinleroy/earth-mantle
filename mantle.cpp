@@ -49,9 +49,11 @@ void Mantle::LoadInitialFile(/* TODO take a file */)
     vtkSmartPointer<vtkFloatArray> temperature = vtkFloatArray::SafeDownCast(polyData->GetCellData()->GetArray("temperature"));
     imageData->GetPointData()->SetScalars(temperature);
 
-    vtkSmartPointer<vtkFixedPointVolumeRayCastMapper> mapper = vtkSmartPointer<vtkFixedPointVolumeRayCastMapper>::New();
-//    vtkSmartPointer<vtkSmartVolumeMapper> mapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
+//    vtkSmartPointer<vtkFixedPointVolumeRayCastMapper> mapper = vtkSmartPointer<vtkFixedPointVolumeRayCastMapper>::New();
+    vtkSmartPointer<vtkSmartVolumeMapper> mapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
+    mapper->SetBlendModeToComposite();
     mapper->SetInputData(imageData);
+    mapper->SetRequestedRenderModeToRayCast();
 
 //    imageData->Print(std::cout);
 
@@ -65,6 +67,8 @@ void Mantle::LoadInitialFile(/* TODO take a file */)
     opacityFunc->AddPoint(1000.0, 1.0);
 
     vtkSmartPointer<vtkVolumeProperty> property = vtkSmartPointer<vtkVolumeProperty>::New();
+    property->ShadeOff();
+    property->SetInterpolationType(VTK_LINEAR_INTERPOLATION);
     property->SetColor(colorFunc);
     property->SetScalarOpacity(opacityFunc);
     property->ShadeOn();
