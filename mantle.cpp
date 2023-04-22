@@ -58,13 +58,12 @@ void Mantle::LoadInitialFile(/* TODO take a file */)
 //    imageData->Print(std::cout);
 
     vtkSmartPointer<vtkColorTransferFunction> colorFunc = vtkSmartPointer<vtkColorTransferFunction>::New();
-    colorFunc->AddRGBPoint(-6378.21, 0.0, 0.0, 1.0);
+    colorFunc->AddRGBPoint(-4500.0, 0.0, 0.0, 1.0);
     colorFunc->AddRGBPoint(0, 0.0, 1.0, 0.0);
-    colorFunc->AddRGBPoint(6378.21, 1.0, 0.0, 0.0);
+    colorFunc->AddRGBPoint(7000.0, 1.0, 0.0, 0.0);
     vtkSmartPointer<vtkPiecewiseFunction> opacityFunc = vtkSmartPointer<vtkPiecewiseFunction>::New();
-    opacityFunc->AddPoint(-1000.0, 1.0);
     opacityFunc->AddPoint(0.0, 1.0);
-    opacityFunc->AddPoint(1000.0, 1.0);
+    opacityFunc->AddPoint(4500.0, 0.0);
 
     vtkSmartPointer<vtkVolumeProperty> property = vtkSmartPointer<vtkVolumeProperty>::New();
     property->ShadeOff();
