@@ -18,7 +18,7 @@ Window::Window()
     mRenderer = vtkSmartPointer<vtkRenderer>::New();
     mRenderer->SetBackground(.2, .2, .2);
     mRenderer->GetActiveCamera()->SetViewUp(0, 0, 1);
-    mRenderer->GetActiveCamera()->SetPosition(0, -100000, 2);
+    mRenderer->GetActiveCamera()->SetPosition(0, -50000, 2);
     mRenderer->UseDepthPeelingOn();
 
     // create scene

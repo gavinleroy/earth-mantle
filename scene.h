@@ -45,6 +45,9 @@ public:
         for (auto volume : mMantle->GetVolumes())
             renderer->AddVolume(volume);
 
+        for (auto actor : mMantle->GetActors())
+            renderer->AddActor(actor);
+
 
         // create a light source
         //		vtkNew<vtkLight> light;

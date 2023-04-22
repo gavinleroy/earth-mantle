@@ -24,6 +24,17 @@
 #include <vtkLookupTable.h>
 #include <vtkStringArray.h>
 #include <vtkAssignAttribute.h>
+#include <vtkCellData.h>
+#include <vtkStructuredGrid.h>
+#include <vtkPlane.h>
+#include <vtkCutter.h>
+#include <vtkClipPolyData.h>
+#include <vtkStructuredGridGeometryFilter.h>
+#include <vtkPolyData.h>
+#include <vtkRectilinearGrid.h>
+#include <vtkCellDataToPointData.h>
+#include <vtkFloatArray.h>
+#include <vtkFixedPointVolumeRayCastMapper.h>
 
 /// <summary>
 /// Class that represents the Earth.

@@ -5,12 +5,12 @@
 //       we'll have to look at how to do time-series properly.
 void Mantle::LoadInitialFile(/* TODO take a file */)
 {
-    vtkSmartPointer<vtkNetCDFReader> reader = vtkSmartPointer<vtkNetCDFReader>::New();
+    vtkSmartPointer<vtkNetCDFCFReader> reader = vtkSmartPointer<vtkNetCDFCFReader>::New();
     reader->SetFileName("../data/FullMantle/spherical001.nc");
     reader->UpdateMetaData();
-    reader->SetVariableArrayStatus("lon", 1);
-    reader->SetVariableArrayStatus("lat", 1);
-    reader->SetVariableArrayStatus("r", 1);
+    reader->SetVariableArrayStatus("lon", 0);
+    reader->SetVariableArrayStatus("lat", 0);
+    reader->SetVariableArrayStatus("r", 0);
     reader->SetVariableArrayStatus("temperature", 1);
 
     reader->SetVariableArrayStatus("vx", 1);
@@ -19,25 +19,74 @@ void Mantle::LoadInitialFile(/* TODO take a file */)
 
     reader->Update();
 
-    reader->Print(std::cout);
     reader->GetOutput()->Print(std::cout);
+    vtkSmartPointer<vtkStructuredGrid> structuredGrid = vtkStructuredGrid::SafeDownCast(reader->GetOutput());
 
-    vtkNew<vtkAssignAttribute> assignAttribute;
-    assignAttribute->SetInputConnection(reader->GetOutputPort());
-    assignAttribute->Assign("temperature", "SCALARS", "POINT_DATA");
+    vtkSmartPointer<vtkStructuredGridGeometryFilter> geometryFilter = vtkSmartPointer<vtkStructuredGridGeometryFilter>::New();
+    geometryFilter->SetInputData(structuredGrid);
+    geometryFilter->Update();
+    vtkSmartPointer<vtkPolyData> polyData = geometryFilter->GetOutput();
 
-    vtkNew<vtkSmartVolumeMapper> volumeMapper;
-    volumeMapper->SetBlendModeToComposite();  // composite first
-    // NOTE: using input data was just how they do it in the following example:
-    // https://kitware.github.io/vtk-examples/site/Cxx/VolumeRendering/SmartVolumeMapper/
-    // volumeMapper->SetInputData(/* TODO */);
+    vtkSmartPointer<vtkCellDataToPointData> c2p = vtkSmartPointer<vtkCellDataToPointData>::New();
+    c2p->SetInputData(polyData);
+    c2p->PassCellDataOn();
+    c2p->Update();
 
-    volumeMapper->SetInputConnection(assignAttribute->GetOutputPort());
-    volumeMapper->SelectScalarArray("temperature");
-    volumeMapper->SetScalarModeToUsePointFieldData();
+    vtkSmartPointer<vtkImageData> imageData = vtkSmartPointer<vtkImageData>::New();
+    imageData->SetSpacing(0.1, 0.1, 0.1);
+
+
+
+    vtkSmartPointer<vtkResampleToImage> resample = vtkSmartPointer<vtkResampleToImage>::New();
+//    resample->GetUpdateExtent(imageData->GetExtent());
+    resample->SetInputConnection(c2p->GetOutputPort());
+//    resample->SetSamplingDimensions(100, 100, 100);
+//    resample->SetOutputSpacing(imageData->GetSpacing());
+//    resample->SetOutputExtent(imageData->GetExtent());
+    resample->Update();
+    imageData = resample->GetOutput();
+
+    vtkSmartPointer<vtkFloatArray> temperature = vtkFloatArray::SafeDownCast(polyData->GetCellData()->GetArray("temperature"));
+    imageData->GetPointData()->SetScalars(temperature);
+
+    vtkSmartPointer<vtkFixedPointVolumeRayCastMapper> mapper = vtkSmartPointer<vtkFixedPointVolumeRayCastMapper>::New();
+//    vtkSmartPointer<vtkSmartVolumeMapper> mapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
+    mapper->SetInputData(imageData);
+
+//    imageData->Print(std::cout);
+
+    vtkSmartPointer<vtkColorTransferFunction> colorFunc = vtkSmartPointer<vtkColorTransferFunction>::New();
+    colorFunc->AddRGBPoint(-6378.21, 0.0, 0.0, 1.0);
+    colorFunc->AddRGBPoint(0, 0.0, 1.0, 0.0);
+    colorFunc->AddRGBPoint(6378.21, 1.0, 0.0, 0.0);
+    vtkSmartPointer<vtkPiecewiseFunction> opacityFunc = vtkSmartPointer<vtkPiecewiseFunction>::New();
+    opacityFunc->AddPoint(-1000.0, 1.0);
+    opacityFunc->AddPoint(0.0, 1.0);
+    opacityFunc->AddPoint(1000.0, 1.0);
+
+    vtkSmartPointer<vtkVolumeProperty> property = vtkSmartPointer<vtkVolumeProperty>::New();
+    property->SetColor(colorFunc);
+    property->SetScalarOpacity(opacityFunc);
+    property->ShadeOn();
+
+    this->mVolume->SetMapper(mapper);
+    this->mVolume->SetProperty(property);
+
+//    vtkNew<vtkSmartVolumeMapper> volumeMapper;
+//    volumeMapper->SetBlendModeToComposite();  // composite first
+//    // NOTE: using input data was just how they do it in the following example:
+//    // https://kitware.github.io/vtk-examples/site/Cxx/VolumeRendering/SmartVolumeMapper/
+//    // volumeMapper->SetInputData(/* TODO */);
+//
+////    volumeMapper->SetInputConnection(assignAttribute->GetOutputPort());
+//    volumeMapper->SetInputData(imageData);
+//    volumeMapper->SelectScalarArray("temperature");
+//    volumeMapper->SetScalarModeToUseCellData();
+//    volumeMapper->SetRequestedRenderModeToRayCast();
 
     // this->mActor->SetMapper((vtkMapper *)&*volumeMapper);
-    this->mVolume->SetMapper(volumeMapper);
+//    this->mVolume->SetMapper(volumeMapper);
+//    this->mActor->SetMapper(mapper);
 }
 
 // TODO: ultimately the constructor should just set up the
@@ -102,6 +151,30 @@ Mantle::Mantle()
     //        mActor = vtkSmartPointer<vtkActor>::New();
     //        mActor->SetMapper(mVolume);
     //        mActor->SetPosition(0, 0, 0);
+
+    //    TODO: assignAttribute contains no Data, fix?
+    //    assignAttribute->GetOutput()->Print(std::cout);
+
+    //    vtkSmartPointer<vtkPlane> plane = vtkSmartPointer<vtkPlane>::New();
+    //    plane->SetOrigin(0.0, 0.0, 0.0);
+    //    plane->SetNormal(0.0, 1.0, 0.0);
+    //
+    //    vtkSmartPointer<vtkClipPolyData> clipper = vtkSmartPointer<vtkClipPolyData>::New();
+    //    clipper->SetInputData(polyData);
+    //    clipper->SetClipFunction(plane);
+    //    clipper->InsideOutOn();
+    //    clipper->Update();
+
+    //    vtkSmartPointer<vtkCutter> cutter =
+    //            vtkSmartPointer<vtkCutter>::New();
+    //    cutter->SetInputData(structuredData);
+    //    cutter->SetCutFunction(plane);
+    //    cutter->Update();
+
+    //    vtkSmartPointer<vtkDataSetMapper> mapper = vtkSmartPointer<vtkDataSetMapper>::New();
+    //    mapper->SetInputData(clipper->GetOutput());
+    //    mapper->SetScalarModeToUseCellData();
+    //    mapper->SelectColorArray("temperature");
 }
 
 void Mantle::Update()

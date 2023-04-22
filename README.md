@@ -11,6 +11,9 @@ cd build
 cmake ..
 
 make -j && ./earth-mantle
+
+make -j && ./earth-mantle.app/Contents/MacOS/earth-mantle
+
 ```
 
 :beers:
