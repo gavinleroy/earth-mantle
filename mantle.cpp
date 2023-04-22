@@ -13,67 +13,86 @@ void Mantle::LoadInitialFile(/* TODO take a file */)
     reader->SetVariableArrayStatus("r", 0);
     reader->SetVariableArrayStatus("temperature", 1);
 
-    reader->SetVariableArrayStatus("vx", 1);
-    reader->SetVariableArrayStatus("vy", 1);
-    reader->SetVariableArrayStatus("vz", 1);
+    reader->SetVariableArrayStatus("vx", 0);
+    reader->SetVariableArrayStatus("vy", 0);
+    reader->SetVariableArrayStatus("vz", 0);
+    reader->SetVariableArrayStatus("thermal conductivity", 0);
+    reader->SetVariableArrayStatus("thermal expansivity", 0);
+    reader->SetVariableArrayStatus("spin transition-induced density anomaly", 0);
+    reader->SetVariableArrayStatus("temperature anomaly", 0);
 
     reader->Update();
 
     reader->GetOutput()->Print(std::cout);
     vtkSmartPointer<vtkStructuredGrid> structuredGrid = vtkStructuredGrid::SafeDownCast(reader->GetOutput());
 
-    vtkSmartPointer<vtkStructuredGridGeometryFilter> geometryFilter = vtkSmartPointer<vtkStructuredGridGeometryFilter>::New();
-    geometryFilter->SetInputData(structuredGrid);
-    geometryFilter->Update();
-    vtkSmartPointer<vtkPolyData> polyData = geometryFilter->GetOutput();
+    structuredGrid->Print(std::cout);
 
-    vtkSmartPointer<vtkCellDataToPointData> c2p = vtkSmartPointer<vtkCellDataToPointData>::New();
-    c2p->SetInputData(polyData);
-    c2p->PassCellDataOn();
-    c2p->Update();
+    vtkSmartPointer<vtkDataSetMapper> mapper = vtkSmartPointer<vtkDataSetMapper>::New();
+    mapper->SetInputData(structuredGrid);
 
-    vtkSmartPointer<vtkImageData> imageData = vtkSmartPointer<vtkImageData>::New();
-    imageData->SetSpacing(0.1, 0.1, 0.1);
+    double range[2];
+    structuredGrid->GetCellData()->GetArray("temperature")->GetRange(range);
+    std::cout << range[0] << " " << range[1] << std::endl;
+    mapper->SetScalarRange(range);
+    mapper->SelectColorArray("temperature");
+
+    mActor->SetMapper(mapper);
+    mActor->GetProperty()->SetRepresentationToWireframe();
 
 
-
-    vtkSmartPointer<vtkResampleToImage> resample = vtkSmartPointer<vtkResampleToImage>::New();
-//    resample->GetUpdateExtent(imageData->GetExtent());
-    resample->SetInputConnection(c2p->GetOutputPort());
-//    resample->SetSamplingDimensions(100, 100, 100);
-//    resample->SetOutputSpacing(imageData->GetSpacing());
-//    resample->SetOutputExtent(imageData->GetExtent());
-    resample->Update();
-    imageData = resample->GetOutput();
-
-    vtkSmartPointer<vtkFloatArray> temperature = vtkFloatArray::SafeDownCast(polyData->GetCellData()->GetArray("temperature"));
-    imageData->GetPointData()->SetScalars(temperature);
-
-//    vtkSmartPointer<vtkFixedPointVolumeRayCastMapper> mapper = vtkSmartPointer<vtkFixedPointVolumeRayCastMapper>::New();
-    vtkSmartPointer<vtkSmartVolumeMapper> mapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
-    mapper->SetBlendModeToComposite();
-    mapper->SetInputData(imageData);
-    mapper->SetRequestedRenderModeToRayCast();
-
-//    imageData->Print(std::cout);
-
-    vtkSmartPointer<vtkColorTransferFunction> colorFunc = vtkSmartPointer<vtkColorTransferFunction>::New();
-    colorFunc->AddRGBPoint(-4500.0, 0.0, 0.0, 1.0);
-    colorFunc->AddRGBPoint(0, 0.0, 1.0, 0.0);
-    colorFunc->AddRGBPoint(7000.0, 1.0, 0.0, 0.0);
-    vtkSmartPointer<vtkPiecewiseFunction> opacityFunc = vtkSmartPointer<vtkPiecewiseFunction>::New();
-    opacityFunc->AddPoint(0.0, 1.0);
-    opacityFunc->AddPoint(4500.0, 0.0);
-
-    vtkSmartPointer<vtkVolumeProperty> property = vtkSmartPointer<vtkVolumeProperty>::New();
-    property->ShadeOff();
-    property->SetInterpolationType(VTK_LINEAR_INTERPOLATION);
-    property->SetColor(colorFunc);
-    property->SetScalarOpacity(opacityFunc);
-    property->ShadeOn();
-
-    this->mVolume->SetMapper(mapper);
-    this->mVolume->SetProperty(property);
+//    vtkSmartPointer<vtkStructuredGridGeometryFilter> geometryFilter = vtkSmartPointer<vtkStructuredGridGeometryFilter>::New();
+//    geometryFilter->SetInputData(structuredGrid);
+//    geometryFilter->Update();
+//    vtkSmartPointer<vtkPolyData> polyData = geometryFilter->GetOutput();
+//
+//    vtkSmartPointer<vtkCellDataToPointData> c2p = vtkSmartPointer<vtkCellDataToPointData>::New();
+//    c2p->SetInputData(polyData);
+//    c2p->PassCellDataOn();
+//    c2p->Update();
+//
+//    vtkSmartPointer<vtkImageData> imageData = vtkSmartPointer<vtkImageData>::New();
+//    imageData->SetSpacing(0.1, 0.1, 0.1);
+//
+//
+//
+//    vtkSmartPointer<vtkResampleToImage> resample = vtkSmartPointer<vtkResampleToImage>::New();
+////    resample->GetUpdateExtent(imageData->GetExtent());
+//    resample->SetInputConnection(c2p->GetOutputPort());
+////    resample->SetSamplingDimensions(100, 100, 100);
+////    resample->SetOutputSpacing(imageData->GetSpacing());
+////    resample->SetOutputExtent(imageData->GetExtent());
+//    resample->Update();
+//    imageData = resample->GetOutput();
+//
+//    vtkSmartPointer<vtkFloatArray> temperature = vtkFloatArray::SafeDownCast(polyData->GetCellData()->GetArray("temperature"));
+//    imageData->GetPointData()->SetScalars(temperature);
+//
+////    vtkSmartPointer<vtkFixedPointVolumeRayCastMapper> mapper = vtkSmartPointer<vtkFixedPointVolumeRayCastMapper>::New();
+//    vtkSmartPointer<vtkSmartVolumeMapper> mapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
+//    mapper->SetBlendModeToComposite();
+//    mapper->SetInputData(imageData);
+//    mapper->SetRequestedRenderModeToRayCast();
+//
+////    imageData->Print(std::cout);
+//
+//    vtkSmartPointer<vtkColorTransferFunction> colorFunc = vtkSmartPointer<vtkColorTransferFunction>::New();
+//    colorFunc->AddRGBPoint(-4500.0, 0.0, 0.0, 1.0);
+//    colorFunc->AddRGBPoint(0, 0.0, 1.0, 0.0);
+//    colorFunc->AddRGBPoint(7000.0, 1.0, 0.0, 0.0);
+//    vtkSmartPointer<vtkPiecewiseFunction> opacityFunc = vtkSmartPointer<vtkPiecewiseFunction>::New();
+//    opacityFunc->AddPoint(0.0, 1.0);
+//    opacityFunc->AddPoint(4500.0, 0.0);
+//
+//    vtkSmartPointer<vtkVolumeProperty> property = vtkSmartPointer<vtkVolumeProperty>::New();
+//    property->ShadeOff();
+//    property->SetInterpolationType(VTK_LINEAR_INTERPOLATION);
+//    property->SetColor(colorFunc);
+//    property->SetScalarOpacity(opacityFunc);
+//    property->ShadeOn();
+//
+//    this->mVolume->SetMapper(mapper);
+//    this->mVolume->SetProperty(property);
 
 //    vtkNew<vtkSmartVolumeMapper> volumeMapper;
 //    volumeMapper->SetBlendModeToComposite();  // composite first
