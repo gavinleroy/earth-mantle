@@ -46,6 +46,8 @@
 #include <vtkArrayCalculator.h>
 #include <vtkStreamTracer.h>
 #include <vtkLineSource.h>
+#include <vtkStructuredGridOutlineFilter.h>
+#include <vtkNamedColors.h>
 
 #include "Mantle.h"
 
@@ -54,14 +56,13 @@ private:
     Tube(const Tube &) = delete;            // Delete the copy-constructor.
     void operator=(const Tube &) = delete;  // Delete the assignment operator.
 
-    vtkSmartPointer<vtkVolume> mVolume;
-    vtkSmartPointer<vtkActor>  mActor;
+    vtkSmartPointer<vtkActor> streamlineActor;
 
 public:
     Tube();
 
     std::vector<vtkSmartPointer<vtkActor>>  GetActors();
-
+    std::vector<vtkSmartPointer<vtkVolume>> GetVolumes();
 
     void Update();
 };

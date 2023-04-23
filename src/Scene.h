@@ -32,11 +32,14 @@ public:
         // for (auto actor : mMantle->GetActors())
         //     renderer->AddActor(actor);
 
-        for (auto volume : volumes->GetVolumes())
-            renderer->AddVolume(volume);
+        // for (auto volume : volumes->GetVolumes())
+        //     renderer->AddVolume(volume);
 
-         for (auto actor : tube->GetActors())
-             renderer->AddActor(actor);
+        for (auto actor : tube->GetActors())
+            renderer->AddActor(actor);
+
+        for (auto volume : tube->GetVolumes())
+            renderer->AddActor(volume);
 
         // TODO: do we need a light source?
     }

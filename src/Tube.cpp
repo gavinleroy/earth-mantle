@@ -1,91 +1,77 @@
 #include "Tube.h"
+#include <vtkColorTransferFunction.h>
 
 Tube::Tube()
     : Mantle()
-    , mActor(vtkSmartPointer<vtkActor>::New())
+    , streamlineActor(vtkSmartPointer<vtkActor>::New())
 {
     auto variables = std::vector<std::string>({
-                                                      "vx",
-                                                      "vy",
-                                                      "vz",
-                                              });
+        "vx",
+        "vy",
+        "vz",
+    });
 
-    auto loaded_from_file = LoadFromFile("spherical001.nc", variables);
+    auto structuredGrid = LoadFromFile("spherical001.nc", variables);
 
-//    vtkNew<vtkCellDataToPointData> cellToPoint;
-//    cellToPoint->SetInputData(loaded_from_file);
-//    cellToPoint->Update();
-//
-//    auto structured_grid = cellToPoint->GetStructuredGridOutput();
+    vtkNew<vtkLookupTable> ctf;
+    ctf->SetVectorMode(vtkScalarsToColors::MAGNITUDE);
+    ctf->SetHueRange(0.667, 0.0);
+    ctf->SetValueRange(1, 1);
+    ctf->SetSaturationRange(1, 1);
 
-    vtkNew<vtkResampleToImage> resampler;
-    resampler->SetInputDataObject(loaded_from_file);
-    resampler->SetSamplingDimensions(100, 100, 100);
-    resampler->Update();
+    vtkNew<vtkCellDataToPointData> cellToPoint;
+    cellToPoint->SetInputData(structuredGrid);
+    cellToPoint->Update();
 
-#ifndef NDEBUG
-    resampler->GetOutput()->Print(std::cout);
-#endif
-
-    vtkSmartPointer<vtkArrayCalculator> calculator
-            = vtkSmartPointer<vtkArrayCalculator>::New();
-    calculator->SetInputConnection(resampler->GetOutputPort());
+    vtkNew<vtkArrayCalculator> calculator;
+    calculator->SetInputConnection(cellToPoint->GetOutputPort());
     calculator->SetResultArrayName("velocity");
     calculator->AddScalarVariable("vx", "vx");
     calculator->AddScalarVariable("vy", "vy");
     calculator->AddScalarVariable("vz", "vz");
     calculator->SetFunction("(iHat * vx + jHat * vy + kHat * vz) * 1e9");
-    calculator->Update();
-//
-//    calculator->GetOutput()->Print(std::cout);
 
-    vtkSmartPointer<vtkLineSource> line = vtkSmartPointer<vtkLineSource>::New();
+    vtkNew<vtkLineSource> line;
     line->SetResolution(1000);
     line->SetPoint1(-6378., -6378., -6378.);
-    line->SetPoint2(6435, 5683, 6414);
+    line->SetPoint2(6378., 6378., 6378.);
 
+    vtkNew<vtkAssignAttribute> assignAttribute;
+    assignAttribute->SetInputConnection(calculator->GetOutputPort());
+    assignAttribute->Assign("velocity", vtkDataSetAttributes::SCALARS,
+                            vtkAssignAttribute::POINT_DATA);
+    assignAttribute->Update();
 
-//    vtkNew<vtkAssignAttribute> assignAttribute;
-//    assignAttribute->SetInputConnection(calculator->GetOutputPort());
-//    assignAttribute->Assign("velocity", "VECTORS", "CELL_DATA");
-//    assignAttribute->Update();
-
-    vtkSmartPointer<vtkStreamTracer> tracer = vtkSmartPointer<vtkStreamTracer>::New();
-    tracer->SetInputConnection(calculator->GetOutputPort());
+    vtkNew<vtkStreamTracer> tracer;
+    tracer->SetInputConnection(assignAttribute->GetOutputPort());
     tracer->SetSourceConnection(line->GetOutputPort());
+
+    tracer->SetInterpolatorType(vtkStreamTracer::INTERPOLATOR_WITH_DATASET_POINT_LOCATOR);
+    tracer->SetIntegrationDirection(vtkStreamTracer::BOTH);
+    tracer->SetIntegratorType(vtkStreamTracer::RUNGE_KUTTA45);
+    tracer->SetIntegrationStepUnit(vtkStreamTracer::CELL_LENGTH_UNIT);
+
     tracer->SetTerminalSpeed(1e-12);
-    tracer->SetInterpolatorTypeToDataSetPointLocator();
-    tracer->SurfaceStreamlinesOff();
-    tracer->SetIntegrationDirectionToBoth();
-    tracer->SetIntegrationStepUnit(2);
-    tracer->SetInitialIntegrationStep(0.2);
-    tracer->SetMinimumIntegrationStep(0.01);
-    tracer->SetMaximumIntegrationStep(0.5);
-    tracer->SetMaximumNumberOfSteps(2000);
     tracer->SetMaximumError(1e-6);
-    tracer->SetIntegratorTypeToRungeKutta45();
-    tracer->Update();
+    tracer->SetMaximumPropagation(12760);
+    tracer->SetMaximumNumberOfSteps(2000);
+
+#ifndef NDEBUG
     tracer->GetOutput()->Print(std::cout);
-//
-//    vtkSmartPointer<vtkPolyData> streamlines = vtkSmartPointer<vtkPolyData>::New();
-//    streamlines->ShallowCopy(tracer->GetOutput());
-//
-//    std::cout << streamlines->GetNumberOfPoints() << std::endl;
+#endif
 
-    vtkSmartPointer<vtkTubeFilter> tubeFilter = vtkSmartPointer<vtkTubeFilter>::New();
-    tubeFilter->SetInputConnection(tracer->GetOutputPort());
-    tubeFilter->SetRadius(127.1);
-    tubeFilter->SetNumberOfSides(6);
-    tubeFilter->CappingOn();
-    tubeFilter->Update();
+    vtkNew<vtkTubeFilter> tubes;
+    tubes->SetInputConnection(tracer->GetOutputPort());
+    tubes->SetRadius(127.1);
+    tubes->SetNumberOfSides(6);
+    tubes->CappingOn();
 
-    vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-    mapper->SetInputConnection(tubeFilter->GetOutputPort());
-    mapper->ScalarVisibilityOn();
-//    mapper->SetScalarRange(tubeFilter->GetOutput()->GetScalarRange());
+    vtkNew<vtkPolyDataMapper> streamlineMapper;
+    streamlineMapper->SetInputConnection(tubes->GetOutputPort());
+    streamlineMapper->SetLookupTable(ctf);
 
-    mActor->SetMapper(mapper);
-    mActor->VisibilityOn();
+    streamlineActor->SetMapper(streamlineMapper);
+    streamlineActor->VisibilityOn();
 }
 
 
@@ -96,6 +82,11 @@ void Tube::Update()
 // TODO:
 std::vector<vtkSmartPointer<vtkActor>> Tube::GetActors()
 {
-    auto v = std::vector<vtkSmartPointer<vtkActor>>({ this->mActor });
-    return v;
+    return std::vector<vtkSmartPointer<vtkActor>>({ this->streamlineActor });
+}
+
+
+std::vector<vtkSmartPointer<vtkVolume>> Tube::GetVolumes()
+{
+    return std::vector<vtkSmartPointer<vtkVolume>>();
 }

@@ -41,6 +41,8 @@
 #include <vtkTubeFilter.h>
 #include <vtkMarchingCubes.h>
 #include <vtkImageDataGeometryFilter.h>
+#include <vtkScalarsToColors.h>
+#include <vtkLookupTable.h>
 
 #include <filesystem>
 

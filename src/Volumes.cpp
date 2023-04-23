@@ -1,4 +1,6 @@
 #include "Volumes.h"
+#include <vtkAssignAttribute.h>
+#include <vtkDataSetAttributes.h>
 
 Volumes::Volumes()
     : Mantle()
@@ -10,6 +12,8 @@ Volumes::Volumes()
         "vy",
         "vz",
     });
+
+    std::string property = "temperature";
 
     auto loaded_from_file = LoadFromFile("spherical001.nc", variables);
 
@@ -30,7 +34,8 @@ Volumes::Volumes()
 
     vtkNew<vtkAssignAttribute> assignAttribute;
     assignAttribute->SetInputConnection(resampler->GetOutputPort());
-    assignAttribute->Assign("temperature", "SCALARS", "POINT_DATA");
+    assignAttribute->Assign(property.c_str(), vtkDataSetAttributes::SCALARS,
+                            vtkAssignAttribute::POINT_DATA);
     assignAttribute->Update();
 
 #ifndef NDEBUG
@@ -62,7 +67,7 @@ Volumes::Volumes()
     // Add a mapper to create graphic primitives from the data
     vtkNew<vtkSmartVolumeMapper> volumeMapper;
     volumeMapper->SetInputConnection(assignAttribute->GetOutputPort());
-    volumeMapper->SelectScalarArray("temperature");
+    volumeMapper->SelectScalarArray(property.c_str());
     volumeMapper->AddClippingPlane(plane);
     // volumeMapper->SetBlendModeToIsoSurface();
     // volumeMapper->SetSampleDistance(4);
