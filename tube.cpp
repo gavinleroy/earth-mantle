@@ -88,7 +88,28 @@ void Tube::LoadTubeSet(std::filesystem::path data_dir)
 
     vtkSmartPointer<vtkStreamTracer> tracer = vtkSmartPointer<vtkStreamTracer>::New();
     tracer->SetInputConnection(calculator->GetOutputPort());
+    tracer->SetStartPosition(0, 0, 0);
+    tracer->SetIntegratorTypeToRungeKutta4();
+    tracer->Update();
     tracer->GetOutput()->Print(std::cout);
+
+    vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    mapper->SetInputConnection(tracer->GetOutputPort());
+
+    mActor->SetMapper(mapper);
+
+    vtkSmartPointer<vtkTubeFilter> tubeFilter = vtkSmartPointer<vtkTubeFilter>::New();
+    tubeFilter->SetInputConnection(tracer->GetOutputPort());
+    tubeFilter->SetRadius(127.1);
+    tubeFilter->SetNumberOfSides(6);
+    tubeFilter->CappingOn();
+    tubeFilter->Update();
+//
+//    vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+//    mapper->SetInputConnection(tubeFilter->GetOutputPort());
+//
+//    mActor->SetMapper(mapper);
+
     //    resampler->GetOutput()->Print(std::cout);
 }
 
