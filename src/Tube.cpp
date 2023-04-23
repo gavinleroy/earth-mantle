@@ -1,51 +1,16 @@
-#include "tube.h"
+#include "Tube.h"
 
 Tube::Tube()
-    : mVolume(vtkSmartPointer<vtkVolume>::New())
+    : Mantle()
     , mActor(vtkSmartPointer<vtkActor>::New())
 {
-    LoadTubeSet("/dev/null");
-}
+    auto variables = std::vector<std::string>({
+                                                      "vx",
+                                                      "vy",
+                                                      "vz",
+                                              });
 
-vtkSmartPointer<vtkDataObject> Tube::LoadFromFile(const std::string fn)
-{
-#ifndef NDEBUG
-    // std::cout << "Loading variable: " << variable << " from file: " << fn << std::endl;
-#endif
-
-    vtkNew<vtkNetCDFCFReader> reader;
-
-    reader->SetFileName(fn.c_str());
-    reader->UpdateMetaData();
-    reader->SetSphericalCoordinates(true);
-    reader->SetOutputTypeToStructured();
-
-    // Unset all available variables
-    std::for_each(
-        std::rbegin(this->variables), std::rend(this->variables),
-        [&](auto const &value) { reader->SetVariableArrayStatus(value.c_str(), 0); });
-
-    // Explicitly set the variables we want
-    std::for_each(
-        std::rbegin(this->include), std::rend(this->include),
-        [&](auto const &value) { reader->SetVariableArrayStatus(value.c_str(), 1); });
-
-
-    reader->Update();
-
-#ifndef NDEBUG
-    reader->GetOutput()->Print(std::cout);
-#endif
-
-    return reader->GetOutput();
-}
-
-void Tube::LoadTubeSet(std::filesystem::path data_dir)
-{
-    // TODO: load series from a specified directory (specify root via env var)
-    const std::string fn = "../data/FullMantle/spherical001.nc";
-
-    auto loaded_from_file = LoadFromFile(fn);
+    auto loaded_from_file = LoadFromFile("spherical001.nc", variables);
 
 //    vtkNew<vtkCellDataToPointData> cellToPoint;
 //    cellToPoint->SetInputData(loaded_from_file);
@@ -63,7 +28,7 @@ void Tube::LoadTubeSet(std::filesystem::path data_dir)
 #endif
 
     vtkSmartPointer<vtkArrayCalculator> calculator
-        = vtkSmartPointer<vtkArrayCalculator>::New();
+            = vtkSmartPointer<vtkArrayCalculator>::New();
     calculator->SetInputConnection(resampler->GetOutputPort());
     calculator->SetResultArrayName("velocity");
     calculator->AddScalarVariable("vx", "vx");
@@ -116,21 +81,13 @@ void Tube::LoadTubeSet(std::filesystem::path data_dir)
 
     vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     mapper->SetInputConnection(tubeFilter->GetOutputPort());
+    mapper->ScalarVisibilityOn();
+//    mapper->SetScalarRange(tubeFilter->GetOutput()->GetScalarRange());
 
     mActor->SetMapper(mapper);
-//    vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-//    mapper->SetInputConnection(tubeFilter->GetOutputPort());
-//
-//    mActor->SetMapper(mapper);
-
-//
-//    vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-//    mapper->SetInputConnection(tubeFilter->GetOutputPort());
-//
-//    mActor->SetMapper(mapper);
-
-    //    resampler->GetOutput()->Print(std::cout);
+    mActor->VisibilityOn();
 }
+
 
 void Tube::Update()
 { /* UNIMPLEMENTED */
@@ -140,12 +97,5 @@ void Tube::Update()
 std::vector<vtkSmartPointer<vtkActor>> Tube::GetActors()
 {
     auto v = std::vector<vtkSmartPointer<vtkActor>>({ this->mActor });
-    return v;
-}
-
-// TODO:
-std::vector<vtkSmartPointer<vtkVolume>> Tube::GetVolumes()
-{
-    auto v = std::vector<vtkSmartPointer<vtkVolume>>({ this->mVolume });
     return v;
 }

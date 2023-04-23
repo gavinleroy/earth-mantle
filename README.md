@@ -12,7 +12,7 @@ cmake ..
 
 make -j && ./earth-mantle
 
-make -j && ./earth-mantle.app/Contents/MacOS/earth-mantle
+make -j && ./src/earth-mantle.app/Contents/MacOS/earth-mantle
 
 ```
 

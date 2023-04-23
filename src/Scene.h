@@ -35,8 +35,8 @@ public:
         for (auto volume : volumes->GetVolumes())
             renderer->AddVolume(volume);
 
-        // for (auto actor : tube->GetActors())
-        //     renderer->AddActor(actor);
+         for (auto actor : tube->GetActors())
+             renderer->AddActor(actor);
 
         // TODO: do we need a light source?
     }
