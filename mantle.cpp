@@ -75,12 +75,7 @@ void Mantle::LoadMantleSet(std::filesystem::path data_dir)
 
     vtkNew<vtkAssignAttribute> assignAttribute;
     assignAttribute->SetInputConnection(resampler->GetOutputPort());
-
-    std::for_each(variables.begin(), variables.end(),
-                  [&assignAttribute](auto const &variable) {
-                      assignAttribute->Assign(variable.c_str(), "SCALARS", "POINT_DATA");
-                  });
-
+    assignAttribute->Assign("temperature", "SCALARS", "POINT_DATA");
     assignAttribute->Update();
 
 #ifndef NDEBUG
