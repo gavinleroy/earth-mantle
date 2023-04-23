@@ -1,6 +1,9 @@
 .DS_Store
 .idea
+.cache
 *.log
 tmp/
 
-data/
+data/*
+/cmake-build-debug/
+build/*
