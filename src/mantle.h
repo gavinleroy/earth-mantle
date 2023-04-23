@@ -44,9 +44,6 @@
 
 #include <filesystem>
 
-/// <summary>
-/// Class that represents the Earth.
-/// </summary>
 class Mantle {
 private:
     Mantle(const Mantle &) = delete;          // Delete the copy-constructor.
@@ -57,17 +54,17 @@ private:
           "thermal expansivity", "spin transition-induced density anomaly",
           "temperature anomaly" });
 
+    std::filesystem::path data_directory;
+
     vtkSmartPointer<vtkVolume> mVolume;
     vtkSmartPointer<vtkActor>  mActor;
 
-
+protected:
     vtkSmartPointer<vtkDataObject> LoadFromFile(const std::string              fn,
                                                 const std::vector<std::string> variables);
 
 public:
-    /// <summary>
-    /// Constructor.
-    /// </summary>
+    Mantle(std::filesystem::path data_directory);
     Mantle();
 
     /// Getters for retrieving internal objects.
@@ -77,13 +74,9 @@ public:
     std::vector<vtkSmartPointer<vtkActor>>  GetActors();
     std::vector<vtkSmartPointer<vtkVolume>> GetVolumes();
 
-    void LoadMantleSet(std::filesystem::path data_dir);
+    void LoadMantleSeries();
 
-    /// <summary>
-    /// Updates the properties of the Earth.
-    /// </summary>
-    /// <param name="dt">Time passed since the last Update in milliseconds.</param>
-    /// <param name="t">Total time passed since start of the application in
-    /// milliseconds.</param>
+    void LoadMantleFiles(std::filesystem::path data_dir);
+
     void Update();
 };

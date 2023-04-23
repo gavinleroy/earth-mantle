@@ -1,4 +1,4 @@
-#include "window.h"
+#include "Window.h"
 
 vtkStandardNewMacro(PickingInteractorStyle);
 
@@ -34,7 +34,6 @@ Window::Window()
     vtkNew<PickingInteractorStyle> interactorStyle;
     interactorStyle->SetDefaultRenderer(mRenderer);
     interactorStyle->SetScene(mScene);
-    mRenderer->ResetCamera();
 
     // create interactor
     mRenderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();

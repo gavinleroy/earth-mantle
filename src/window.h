@@ -1,10 +1,8 @@
-//
-// Created by Raphael Winkler on 01.04.23.
-//
 #pragma once
 
-#include "scene.h"
-#include "earth.h"
+
+#include <chrono>
+#include <algorithm>
 
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
@@ -13,8 +11,7 @@
 #include <vtkCamera.h>
 #include <vtkMatrix4x4.h>
 
-#include <chrono>
-#include <algorithm>
+#include "Scene.h"
 
 /// <summary>
 /// Class for the listening to mouse events and inherits its interaction from VTK's

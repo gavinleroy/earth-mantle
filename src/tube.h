@@ -45,23 +45,19 @@
 #include <vtkStreamTracer.h>
 #include <vtkLineSource.h>
 
-#include <filesystem>
+#include "Mantle.h"
 
-/// <summary>
-/// Class that represents the Earth.
-/// </summary>
-class Tube {
+class Tube : private Mantle {
 private:
-    Tube(const Tube &) = delete;          // Delete the copy-constructor.
+    Tube(const Tube &) = delete;            // Delete the copy-constructor.
     void operator=(const Tube &) = delete;  // Delete the assignment operator.
 
     inline const static std::vector<std::string> variables = std::vector<std::string>(
-        { "lon", "lat", "r", "temperature" "thermal conductivity",
-          "thermal expansivity", "spin transition-induced density anomaly",
-          "temperature anomaly" });
+        { "lon", "lat", "r", "temperature", "thermal conductivity", "thermal expansivity",
+          "spin transition-induced density anomaly", "temperature anomaly" });
 
     inline const static std::vector<std::string> include = std::vector<std::string>(
-            { "vx", "vy", "vz" });
+        { "vx", "vy", "vz" });
 
 
     vtkSmartPointer<vtkVolume> mVolume;

@@ -1,4 +1,4 @@
-#include "tube.h"
+#include "Tube.h"
 
 Tube::Tube()
     : mVolume(vtkSmartPointer<vtkVolume>::New())
