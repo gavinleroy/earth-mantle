@@ -5,15 +5,11 @@
 TODO: everything else
 
 Run code:
+
 ```shell
 cd build
 
-cmake ..
-
-make -j && ./earth-mantle
-
-make -j && ./earth-mantle.app/Contents/MacOS/earth-mantle
-
+cmake -DVTK_DIR=$VTK_HOME/build ..
 ```
 
 :beers:
