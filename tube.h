@@ -55,7 +55,7 @@ private:
     void operator=(const Tube &) = delete;  // Delete the assignment operator.
 
     inline const static std::vector<std::string> variables = std::vector<std::string>(
-        { "lon", "lat", "r", "vx", "vy", "vz", "thermal conductivity",
+        { "lon", "lat", "r", "temperature" "thermal conductivity",
           "thermal expansivity", "spin transition-induced density anomaly",
           "temperature anomaly" });
 

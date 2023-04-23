@@ -58,7 +58,6 @@ void Tube::LoadTubeSet(std::filesystem::path data_dir)
     resampler->SetSamplingDimensions(100, 100, 100);
     resampler->Update();
 
-    resampler->GetOutput()->Print(std::cout);
 #ifndef NDEBUG
     resampler->GetOutput()->Print(std::cout);
 #endif
@@ -86,12 +85,36 @@ void Tube::LoadTubeSet(std::filesystem::path data_dir)
 
     calculator->GetOutput()->Print(std::cout);
 
+//    vtkSmartPointer<vtkImageData> data = vtkImageData::SafeDownCast(calculator->GetOutput());
+//    data->Print(std::cout);
+
+//
+//    vtkNew<vtkAssignAttribute> assignAttribute;
+//    assignAttribute->SetInputData(data);
+//    assignAttribute->Assign("velocity", "VECTORS", "POINT_DATA");
+//    assignAttribute->Update();
+
     vtkSmartPointer<vtkStreamTracer> tracer = vtkSmartPointer<vtkStreamTracer>::New();
     tracer->SetInputConnection(calculator->GetOutputPort());
-    tracer->SetStartPosition(0, 0, 0);
-    tracer->SetIntegratorTypeToRungeKutta4();
+    tracer->SetTerminalSpeed(1e-12);
+    tracer->SetInterpolatorTypeToDataSetPointLocator();
+    tracer->SurfaceStreamlinesOff();
+    tracer->SetIntegrationDirectionToBoth();
+    tracer->SetIntegrationStepUnit(2);
+    tracer->SetInitialIntegrationStep(0.2);
+    tracer->SetMinimumIntegrationStep(0.01);
+    tracer->SetMaximumIntegrationStep(0.5);
+    tracer->SetMaximumNumberOfSteps(2000);
+    tracer->SetMaximumError(1e-6);
+    tracer->SetIntegratorTypeToRungeKutta45();
     tracer->Update();
     tracer->GetOutput()->Print(std::cout);
+
+
+    vtkSmartPointer<vtkPolyData> streamlines = vtkSmartPointer<vtkPolyData>::New();
+    streamlines->ShallowCopy(tracer->GetOutput());
+
+    std::cout << streamlines->GetNumberOfPoints() << std::endl;
 
     vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     mapper->SetInputConnection(tracer->GetOutputPort());
