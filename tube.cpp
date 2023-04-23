@@ -94,8 +94,14 @@ void Tube::LoadTubeSet(std::filesystem::path data_dir)
 //    assignAttribute->Assign("velocity", "VECTORS", "POINT_DATA");
 //    assignAttribute->Update();
 
+    vtkSmartPointer<vtkLineSource> line = vtkSmartPointer<vtkLineSource>::New();
+    line->SetResolution(1000);
+    line->SetPoint1(-6378., -6378., -6378.);
+    line->SetPoint2(6435, 5683, 6414);
+
     vtkSmartPointer<vtkStreamTracer> tracer = vtkSmartPointer<vtkStreamTracer>::New();
     tracer->SetInputConnection(calculator->GetOutputPort());
+    tracer->SetSourceConnection(line->GetOutputPort());
     tracer->SetTerminalSpeed(1e-12);
     tracer->SetInterpolatorTypeToDataSetPointLocator();
     tracer->SurfaceStreamlinesOff();
@@ -111,15 +117,15 @@ void Tube::LoadTubeSet(std::filesystem::path data_dir)
     tracer->GetOutput()->Print(std::cout);
 
 
-    vtkSmartPointer<vtkPolyData> streamlines = vtkSmartPointer<vtkPolyData>::New();
-    streamlines->ShallowCopy(tracer->GetOutput());
-
-    std::cout << streamlines->GetNumberOfPoints() << std::endl;
-
     vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     mapper->SetInputConnection(tracer->GetOutputPort());
 
     mActor->SetMapper(mapper);
+
+    vtkSmartPointer<vtkPolyData> streamlines = vtkSmartPointer<vtkPolyData>::New();
+    streamlines->ShallowCopy(tracer->GetOutput());
+
+    std::cout << streamlines->GetNumberOfPoints() << std::endl;
 
     vtkSmartPointer<vtkTubeFilter> tubeFilter = vtkSmartPointer<vtkTubeFilter>::New();
     tubeFilter->SetInputConnection(tracer->GetOutputPort());
@@ -127,6 +133,13 @@ void Tube::LoadTubeSet(std::filesystem::path data_dir)
     tubeFilter->SetNumberOfSides(6);
     tubeFilter->CappingOn();
     tubeFilter->Update();
+
+
+//    vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+//    mapper->SetInputConnection(tubeFilter->GetOutputPort());
+//
+//    mActor->SetMapper(mapper);
+
 //
 //    vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 //    mapper->SetInputConnection(tubeFilter->GetOutputPort());

@@ -43,6 +43,7 @@
 #include <vtkImageDataGeometryFilter.h>
 #include <vtkArrayCalculator.h>
 #include <vtkStreamTracer.h>
+#include <vtkLineSource.h>
 
 #include <filesystem>
 

@@ -32,7 +32,7 @@ public:
     /// <param name="renderer">Renderer to add the props to.</param>
     void InitRenderer(vtkSmartPointer<vtkRenderer> renderer)
     {
-        mEarth->InitRenderer(renderer);
+//        mEarth->InitRenderer(renderer);
 
 
         // mMantle->InitRenderer(renderer);
