@@ -7,12 +7,10 @@ Tube::Tube()
     LoadTubeSet("/dev/null");
 }
 
-vtkSmartPointer<vtkDataObject> Tube::LoadFromFile(
-    const std::string fn
-    )
+vtkSmartPointer<vtkDataObject> Tube::LoadFromFile(const std::string fn)
 {
 #ifndef NDEBUG
-    std::cout << "Loading variable: " << variable << " from file: " << fn << std::endl;
+    // std::cout << "Loading variable: " << variable << " from file: " << fn << std::endl;
 #endif
 
     vtkNew<vtkNetCDFCFReader> reader;
@@ -29,8 +27,8 @@ vtkSmartPointer<vtkDataObject> Tube::LoadFromFile(
 
     // Explicitly set the variables we want
     std::for_each(
-            std::rbegin(this->include), std::rend(this->include),
-            [&](auto const &value) { reader->SetVariableArrayStatus(value.c_str(), 1); });
+        std::rbegin(this->include), std::rend(this->include),
+        [&](auto const &value) { reader->SetVariableArrayStatus(value.c_str(), 1); });
 
 
     reader->Update();
@@ -66,16 +64,18 @@ void Tube::LoadTubeSet(std::filesystem::path data_dir)
 #endif
 
     // Update the calculator filter
-//    vtkNew<vtkAssignAttribute> assignAttribute;
-//    assignAttribute->SetInputConnection(resampler->GetOutputPort());
-//    std::for_each(
-//            std::rbegin(this->include), std::rend(this->include),
-//            [&](auto const &value) { assignAttribute->Assign(value.c_str(), "SCALARS", "POINT_DATA"); });
-//    assignAttribute->Update();
-//
-//
-//    assignAttribute->Print(std::cout);
-    vtkSmartPointer<vtkArrayCalculator> calculator = vtkSmartPointer<vtkArrayCalculator>::New();
+    //    vtkNew<vtkAssignAttribute> assignAttribute;
+    //    assignAttribute->SetInputConnection(resampler->GetOutputPort());
+    //    std::for_each(
+    //            std::rbegin(this->include), std::rend(this->include),
+    //            [&](auto const &value) { assignAttribute->Assign(value.c_str(),
+    //            "SCALARS", "POINT_DATA"); });
+    //    assignAttribute->Update();
+    //
+    //
+    //    assignAttribute->Print(std::cout);
+    vtkSmartPointer<vtkArrayCalculator> calculator
+        = vtkSmartPointer<vtkArrayCalculator>::New();
     calculator->SetInputConnection(resampler->GetOutputPort());
     calculator->SetResultArrayName("velocity");
     calculator->AddScalarVariable("vx", "vx");
@@ -89,7 +89,7 @@ void Tube::LoadTubeSet(std::filesystem::path data_dir)
     vtkSmartPointer<vtkStreamTracer> tracer = vtkSmartPointer<vtkStreamTracer>::New();
     tracer->SetInputConnection(calculator->GetOutputPort());
     tracer->GetOutput()->Print(std::cout);
-//    resampler->GetOutput()->Print(std::cout);
+    //    resampler->GetOutput()->Print(std::cout);
 }
 
 void Tube::Update()
