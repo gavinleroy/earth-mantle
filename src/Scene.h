@@ -10,6 +10,7 @@
 
 #include "Tube.h"
 #include "Volumes.h"
+#include "LineIntegralConvolution.h"
 
 
 class Scene {
@@ -19,11 +20,13 @@ private:
 
     std::unique_ptr<Tube>    tube;
     std::unique_ptr<Volumes> volumes;
+    std::unique_ptr<LineIntegralConvolution> line_integral_convolution;
 
 public:
     Scene()
         : tube(std::make_unique<Tube>())
         , volumes(std::make_unique<Volumes>())
+        , line_integral_convolution(std::make_unique<LineIntegralConvolution>())
     {
     }
 
@@ -40,6 +43,8 @@ public:
 
         for (auto volume : tube->GetVolumes())
             renderer->AddActor(volume);
+
+        renderer->AddActor(line_integral_convolution->GetActor());
 
         // TODO: do we need a light source?
     }
