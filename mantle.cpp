@@ -8,27 +8,32 @@ Mantle::Mantle()
 }
 
 vtkSmartPointer<vtkDataObject> Mantle::LoadFromFile(
-    const std::string fn,
-    const std::string variable /* define polymorphism over computation */)
+    const std::string              fn,
+    const std::vector<std::string> to_load /* define polymorphism over computation */)
 {
 #ifndef NDEBUG
-    std::cout << "Loading variable: " << variable << " from file: " << fn << std::endl;
+    std::cout << "Loading variables from file (" << fn << ")" << std::endl;
+    std::for_each(to_load.begin(), to_load.end(),
+                  [](auto const &value) { std::cout << "  - " << value << std::endl; });
 #endif
 
     vtkNew<vtkNetCDFCFReader> reader;
-
     reader->SetFileName(fn.c_str());
     reader->UpdateMetaData();
     reader->SetSphericalCoordinates(true);
     reader->SetOutputTypeToStructured();
 
+    auto set_to = [&reader](int v) {
+        return [&reader, v](auto const &value) {
+            reader->SetVariableArrayStatus(value.c_str(), v);
+        };
+    };
+
     // Unset all available variables
-    std::for_each(
-        std::rbegin(this->variables), std::rend(this->variables),
-        [&](auto const &value) { reader->SetVariableArrayStatus(value.c_str(), 0); });
+    std::for_each(this->variables.begin(), this->variables.end(), set_to(0));
 
     // Explicitly set the variables we want
-    reader->SetVariableArrayStatus(variable.c_str(), 1);
+    std::for_each(to_load.begin(), to_load.end(), set_to(1));
 
     reader->Update();
 
@@ -44,9 +49,14 @@ void Mantle::LoadMantleSet(std::filesystem::path data_dir)
     // TODO: load series from a specified directory (specify root via env var)
     const std::string fn = "../data/FullMantle/spherical001.nc";
 
-    std::string variable = "temperature";
+    auto variables = std::vector<std::string>({
+        "temperature",
+        "vx",
+        "vy",
+        "vz",
+    });
 
-    auto loaded_from_file = LoadFromFile(fn, variable);
+    auto loaded_from_file = LoadFromFile(fn, variables);
 
     vtkNew<vtkCellDataToPointData> cellToPoint;
     cellToPoint->SetInputData(loaded_from_file);
@@ -65,7 +75,12 @@ void Mantle::LoadMantleSet(std::filesystem::path data_dir)
 
     vtkNew<vtkAssignAttribute> assignAttribute;
     assignAttribute->SetInputConnection(resampler->GetOutputPort());
-    assignAttribute->Assign(variable.c_str(), "SCALARS", "POINT_DATA");
+
+    std::for_each(variables.begin(), variables.end(),
+                  [&assignAttribute](auto const &variable) {
+                      assignAttribute->Assign(variable.c_str(), "SCALARS", "POINT_DATA");
+                  });
+
     assignAttribute->Update();
 
 #ifndef NDEBUG
@@ -79,9 +94,9 @@ void Mantle::LoadMantleSet(std::filesystem::path data_dir)
     colorTransferFunction->AddRGBPoint(3608, 1.0, 0.0, 0.0);
 
     // Create a piecewise function
-     vtkNew<vtkPiecewiseFunction> opacityTransferFunction;
-     opacityTransferFunction->AddPoint(293, 1.0);
-     opacityTransferFunction->AddPoint(3608, 1.0);
+    vtkNew<vtkPiecewiseFunction> opacityTransferFunction;
+    opacityTransferFunction->AddPoint(293, 1.0);
+    opacityTransferFunction->AddPoint(3608, 1.0);
 
     vtkNew<vtkVolumeProperty> volumeProperty;
     volumeProperty->ShadeOn();
@@ -97,7 +112,7 @@ void Mantle::LoadMantleSet(std::filesystem::path data_dir)
     // Add a mapper to create graphic primitives from the data
     vtkNew<vtkSmartVolumeMapper> volumeMapper;
     volumeMapper->SetInputConnection(assignAttribute->GetOutputPort());
-    volumeMapper->SelectScalarArray(variable.c_str());
+    volumeMapper->SelectScalarArray("temperature");
     volumeMapper->AddClippingPlane(plane);
     // volumeMapper->SetBlendModeToIsoSurface();
     // volumeMapper->SetSampleDistance(4);

@@ -61,8 +61,8 @@ private:
     vtkSmartPointer<vtkActor>  mActor;
 
 
-    vtkSmartPointer<vtkDataObject> LoadFromFile(const std::string fn,
-                                                const std::string variable);
+    vtkSmartPointer<vtkDataObject> LoadFromFile(const std::string              fn,
+                                                const std::vector<std::string> variables);
 
 public:
     /// <summary>
