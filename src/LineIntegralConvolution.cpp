@@ -28,22 +28,32 @@ LineIntegralConvolution::LineIntegralConvolution()
     calculator->SetFunction("(iHat * vx + jHat * vy + kHat * vz) * 1e9");
     calculator->Update();
 
-    // Extract the boundary surface
-    auto surface = vtkSmartPointer<vtkDataSetSurfaceFilter>::New();
-    surface->SetInputConnection(calculator->GetOutputPort());
-    surface->Update();
-
-    // Extract the data object from the boundary surface
-    vtkSmartPointer<vtkDataObject> dataObject = surface->GetOutputDataObject(0);
+    // TODO we can get rid of the geometry filter entirely!
+    // Geometry filter
+    auto geometry = vtkSmartPointer<vtkGeometryFilter>::New();
+    geometry->SetInputConnection(calculator->GetOutputPort());
+    geometry->Update();
+    vtkSmartPointer<vtkDataObject> dataObject = geometry->GetOutputDataObject(0);
 
     // Line integral convolution (LIC) mapper
     auto licMapper = vtkSmartPointer<vtkSurfaceLICMapper>::New();
-    licMapper->SetInputConnection(surface->GetOutputPort());
+    licMapper->SetInputConnection(geometry->GetOutputPort());
     licMapper->SetInputDataObject(dataObject);
     licMapper->SetInputArrayToProcess(0, 0, 0, vtkDataObject::POINT, "velocity");
 
+    // LIC parameters
+    auto licInterface = licMapper->GetLICInterface();
+    licInterface->SetEnhancedLIC(0);
+
+    // Slice the geometry
+    auto clippingPlane = vtkSmartPointer<vtkPlane>::New();
+    clippingPlane->SetOrigin(0., 0., 0);
+    clippingPlane->SetNormal(0., 1.0, -1.0);
+    licMapper->AddClippingPlane(clippingPlane);
+
     // Actor
     mActor = vtkSmartPointer<vtkActor>::New();
+    mActor->SetPosition(14000, 0, 0); // TODO adjust this offset!
     mActor->SetMapper(licMapper);
 }
 

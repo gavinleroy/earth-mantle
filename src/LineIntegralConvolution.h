@@ -4,8 +4,9 @@
 #include "vtkCellDataToPointData.h"
 #include "vtkStructuredGrid.h"
 #include "vtkArrayCalculator.h"
-#include "vtkDataSetSurfaceFilter.h"
+#include "vtkGeometryFilter.h"
 #include "vtkSurfaceLICMapper.h"
+#include "vtkSurfaceLICInterface.h"
 
 #include "Mantle.h"
 
