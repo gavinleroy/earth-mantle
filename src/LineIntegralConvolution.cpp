@@ -28,7 +28,7 @@ LineIntegralConvolution::LineIntegralConvolution()
     calculator->SetFunction("(iHat * vx + jHat * vy + kHat * vz) * 1e9");
     calculator->Update();
 
-    // TODO we can get rid of the geometry filter entirely!
+    // TODO do we need this? or can we do this without the intermediate geometry filter?
     // Geometry filter
     auto geometry = vtkSmartPointer<vtkGeometryFilter>::New();
     geometry->SetInputConnection(calculator->GetOutputPort());
@@ -37,12 +37,13 @@ LineIntegralConvolution::LineIntegralConvolution()
 
     // Line integral convolution (LIC) mapper
     auto licMapper = vtkSmartPointer<vtkSurfaceLICMapper>::New();
-    licMapper->SetInputConnection(geometry->GetOutputPort());
+    licMapper->SetInputConnection(calculator->GetOutputPort());
     licMapper->SetInputDataObject(dataObject);
     licMapper->SetInputArrayToProcess(0, 0, 0, vtkDataObject::POINT, "velocity");
 
     // LIC parameters
     auto licInterface = licMapper->GetLICInterface();
+    // Disable enhanced LIC (for now)
     licInterface->SetEnhancedLIC(0);
 
     // Slice the geometry
@@ -53,7 +54,8 @@ LineIntegralConvolution::LineIntegralConvolution()
 
     // Actor
     mActor = vtkSmartPointer<vtkActor>::New();
-    mActor->SetPosition(14000, 0, 0); // TODO adjust this offset!
+    // TODO adjust this offset so the scene looks nice
+    mActor->SetPosition(14000, 0, 0);
     mActor->SetMapper(licMapper);
 }
 
