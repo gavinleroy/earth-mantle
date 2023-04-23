@@ -13,6 +13,7 @@
 #include <vtkDataArraySelection.h>
 #include <vtkAssignAttribute.h>
 #include <vtkSmartVolumeMapper.h>
+#include <vtkVolumeMapper.h>
 #include <vtkVolume.h>
 #include <vtkStructuredGrid.h>
 #include <vtkResampleToImage.h>
@@ -29,6 +30,7 @@
 #include <vtkPlane.h>
 #include <vtkCutter.h>
 #include <vtkClipPolyData.h>
+#include <vtkClipDataSet.h>
 #include <vtkStructuredGridGeometryFilter.h>
 #include <vtkPolyData.h>
 #include <vtkRectilinearGrid.h>
@@ -43,7 +45,7 @@
 /// </summary>
 class Mantle {
 private:
-    Mantle(const Mantle &)         = delete;  // Delete the copy-constructor.
+    Mantle(const Mantle &) = delete;          // Delete the copy-constructor.
     void operator=(const Mantle &) = delete;  // Delete the assignment operator.
 
     inline const static std::vector<std::string> variables = std::vector<std::string>(
@@ -55,7 +57,8 @@ private:
     vtkSmartPointer<vtkActor>  mActor;
 
 
-    void LoadFromFile(const std::string fn, const std::string variable);
+    vtkSmartPointer<vtkDataObject> LoadFromFile(const std::string fn,
+                                                const std::string variable);
 
 public:
     /// <summary>

@@ -7,7 +7,7 @@ Mantle::Mantle()
     LoadMantleSet("/dev/null");
 }
 
-void Mantle::LoadFromFile(
+vtkSmartPointer<vtkDataObject> Mantle::LoadFromFile(
     const std::string fn,
     const std::string variable /* define polymorphism over computation */)
 {
@@ -19,6 +19,8 @@ void Mantle::LoadFromFile(
 
     reader->SetFileName(fn.c_str());
     reader->UpdateMetaData();
+    reader->SetSphericalCoordinates(true);
+    reader->SetOutputTypeToStructured();
 
     // Unset all available variables
     std::for_each(
@@ -34,39 +36,78 @@ void Mantle::LoadFromFile(
     reader->GetOutput()->Print(std::cout);
 #endif
 
-    vtkSmartPointer<vtkStructuredGrid> structuredGrid = vtkStructuredGrid::SafeDownCast(
-        reader->GetOutput());
-
-
-#ifndef NDEBUG
-    structuredGrid->Print(std::cout);
-#endif
-
-    vtkNew<vtkDataSetMapper> mapper;
-    mapper->SetInputData(structuredGrid);
-
-    double range[2];
-    structuredGrid->GetCellData()->GetArray(variable.c_str())->GetRange(range);
-
-#ifndef NDEBUG
-    std::cout << range[0] << " " << range[1] << std::endl;
-#endif
-
-    mapper->SetScalarRange(range);
-    mapper->SelectColorArray(variable.c_str());
-
-    // HACK: this seems very specific to a single pipeline, I(gavin) don't
-    // know how this will interact with the other things we'll need.
-    this->mActor->SetMapper(mapper);
-    this->mActor->GetProperty()->SetRepresentationToWireframe();
+    return reader->GetOutput();
 }
 
 void Mantle::LoadMantleSet(std::filesystem::path data_dir)
 {
     // TODO: load series from a specified directory (specify root via env var)
-    const std::string fn_001 = "../data/FullMantle/spherical001.nc";
+    const std::string fn = "../data/FullMantle/spherical001.nc";
 
-    LoadFromFile(fn_001, "temperature");
+    std::string variable = "temperature";
+
+    auto loaded_from_file = LoadFromFile(fn, variable);
+
+    vtkNew<vtkCellDataToPointData> cellToPoint;
+    cellToPoint->SetInputData(loaded_from_file);
+    cellToPoint->Update();
+
+    auto structured_grid = cellToPoint->GetStructuredGridOutput();
+
+    vtkNew<vtkResampleToImage> resampler;
+    resampler->SetInputDataObject(structured_grid);
+    resampler->SetSamplingDimensions(100, 100, 100);
+    resampler->Update();
+
+#ifndef NDEBUG
+    resampler->GetOutput()->Print(std::cout);
+#endif
+
+    vtkNew<vtkAssignAttribute> assignAttribute;
+    assignAttribute->SetInputConnection(resampler->GetOutputPort());
+    assignAttribute->Assign(variable.c_str(), "SCALARS", "POINT_DATA");
+    assignAttribute->Update();
+
+#ifndef NDEBUG
+    assignAttribute->GetOutput()->Print(std::cout);
+#endif
+
+    // Create a color transfer function
+    vtkNew<vtkColorTransferFunction> colorTransferFunction;
+    colorTransferFunction->AddRGBPoint(293, 0.0, 0.0, 1.0);
+    colorTransferFunction->AddRGBPoint(3608, 1.0, 0.0, 0.0);
+
+    // Create a piecewise function
+    // vtkNew<vtkPiecewiseFunction> opacityTransferFunction;
+    // opacityTransferFunction->AddPoint(-1.0, 0.0);
+    // opacityTransferFunction->AddPoint(0.0, 0.05);
+    // opacityTransferFunction->AddPoint(1.0, 0.1);
+
+    vtkNew<vtkVolumeProperty> volumeProperty;
+    volumeProperty->ShadeOn();
+    volumeProperty->SetInterpolationTypeToLinear();
+    volumeProperty->SetColor(colorTransferFunction);
+    // volumeProperty->SetScalarOpacity(opacityTransferFunction);
+
+    // Add a mapper to create graphic primitives from the data
+    vtkNew<vtkSmartVolumeMapper> volumeMapper;
+    volumeMapper->SetInputConnection(assignAttribute->GetOutputPort());
+    volumeMapper->SelectScalarArray(variable.c_str());
+    // volumeMapper->SetBlendModeToIsoSurface();
+    // volumeMapper->SetSampleDistance(4);
+
+    // HACK: this seems very specific to a single pipeline, I(gavin) don't
+    // know how this will interact with the other things we'll need.
+
+    this->mVolume->SetMapper(volumeMapper);
+    this->mVolume->SetProperty(volumeProperty);
+
+    // this->mVolume->SetMapper(volumeMapper);
+    // this->mVolume->GetProperty()->SetColor(colorTransferFunction);
+    // this->mVolume->GetProperty()->SetScalarOpacity(opacityTransferFunction);
+
+    // this->mActor->SetMapper(mapper);
+    // this->mActor->GetProperty()->SetRepresentationToWireframe();
 }
 
 void Mantle::Update()
