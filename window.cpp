@@ -34,6 +34,7 @@ Window::Window()
     vtkNew<PickingInteractorStyle> interactorStyle;
     interactorStyle->SetDefaultRenderer(mRenderer);
     interactorStyle->SetScene(mScene);
+    mRenderer->ResetCamera();
 
     // create interactor
     mRenderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();

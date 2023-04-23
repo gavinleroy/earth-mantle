@@ -2,6 +2,7 @@
 
 #include "earth.h"
 #include "mantle.h"
+#include "tube.h"
 
 #include <memory>
 
@@ -21,6 +22,7 @@ public:
     Scene()
         : mEarth(std::make_unique<Earth>())
         , mMantle(std::make_unique<Mantle>())
+        , mTube(std::make_unique<Tube>())
     {
     }
 
@@ -48,7 +50,8 @@ public:
         for (auto actor : mMantle->GetActors())
             renderer->AddActor(actor);
 
-
+        for (auto actor : mTube->GetActors())
+            renderer->AddActor(actor);
         // create a light source
         //		vtkNew<vtkLight> light;
         //		light->SetPosition(0, 0, 0);
@@ -86,4 +89,5 @@ private:
 
     std::unique_ptr<Earth>  mEarth;  // Second massive body: Earth
     std::unique_ptr<Mantle> mMantle;
+    std::unique_ptr<Tube> mTube;
 };

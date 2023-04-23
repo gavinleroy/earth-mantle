@@ -41,34 +41,39 @@
 #include <vtkTubeFilter.h>
 #include <vtkMarchingCubes.h>
 #include <vtkImageDataGeometryFilter.h>
+#include <vtkArrayCalculator.h>
+#include <vtkStreamTracer.h>
 
 #include <filesystem>
 
 /// <summary>
 /// Class that represents the Earth.
 /// </summary>
-class Mantle {
+class Tube {
 private:
-    Mantle(const Mantle &) = delete;          // Delete the copy-constructor.
-    void operator=(const Mantle &) = delete;  // Delete the assignment operator.
+    Tube(const Tube &) = delete;          // Delete the copy-constructor.
+    void operator=(const Tube &) = delete;  // Delete the assignment operator.
 
     inline const static std::vector<std::string> variables = std::vector<std::string>(
         { "lon", "lat", "r", "vx", "vy", "vz", "thermal conductivity",
           "thermal expansivity", "spin transition-induced density anomaly",
           "temperature anomaly" });
 
+    inline const static std::vector<std::string> include = std::vector<std::string>(
+            { "vx", "vy", "vz" });
+
+
     vtkSmartPointer<vtkVolume> mVolume;
     vtkSmartPointer<vtkActor>  mActor;
 
 
-    vtkSmartPointer<vtkDataObject> LoadFromFile(const std::string fn,
-                                                const std::string variable);
+    vtkSmartPointer<vtkDataObject> LoadFromFile(const std::string fn);
 
 public:
     /// <summary>
     /// Constructor.
     /// </summary>
-    Mantle();
+    Tube();
 
     /// Getters for retrieving internal objects.
     /// TODO: not sure if we actually want to have both
@@ -77,7 +82,7 @@ public:
     std::vector<vtkSmartPointer<vtkActor>>  GetActors();
     std::vector<vtkSmartPointer<vtkVolume>> GetVolumes();
 
-    void LoadMantleSet(std::filesystem::path data_dir);
+    void LoadTubeSet(std::filesystem::path data_dir);
 
     /// <summary>
     /// Updates the properties of the Earth.

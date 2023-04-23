@@ -75,24 +75,30 @@ void Mantle::LoadMantleSet(std::filesystem::path data_dir)
     // Create a color transfer function
     vtkNew<vtkColorTransferFunction> colorTransferFunction;
     colorTransferFunction->AddRGBPoint(293, 0.0, 0.0, 1.0);
+    colorTransferFunction->AddRGBPoint(1200, 1.0, 1.0, 1.0);
     colorTransferFunction->AddRGBPoint(3608, 1.0, 0.0, 0.0);
 
     // Create a piecewise function
-    // vtkNew<vtkPiecewiseFunction> opacityTransferFunction;
-    // opacityTransferFunction->AddPoint(-1.0, 0.0);
-    // opacityTransferFunction->AddPoint(0.0, 0.05);
-    // opacityTransferFunction->AddPoint(1.0, 0.1);
+     vtkNew<vtkPiecewiseFunction> opacityTransferFunction;
+     opacityTransferFunction->AddPoint(293, 1.0);
+     opacityTransferFunction->AddPoint(3608, 1.0);
 
     vtkNew<vtkVolumeProperty> volumeProperty;
     volumeProperty->ShadeOn();
     volumeProperty->SetInterpolationTypeToLinear();
     volumeProperty->SetColor(colorTransferFunction);
-    // volumeProperty->SetScalarOpacity(opacityTransferFunction);
+    volumeProperty->SetScalarOpacity(opacityTransferFunction);
+
+    vtkSmartPointer<vtkPlane> plane = vtkSmartPointer<vtkPlane>::New();
+    plane->SetOrigin(0., 0., 0.);
+    plane->SetNormal(0., 1.0, -1.);
+
 
     // Add a mapper to create graphic primitives from the data
     vtkNew<vtkSmartVolumeMapper> volumeMapper;
     volumeMapper->SetInputConnection(assignAttribute->GetOutputPort());
     volumeMapper->SelectScalarArray(variable.c_str());
+    volumeMapper->AddClippingPlane(plane);
     // volumeMapper->SetBlendModeToIsoSurface();
     // volumeMapper->SetSampleDistance(4);
 
@@ -101,13 +107,6 @@ void Mantle::LoadMantleSet(std::filesystem::path data_dir)
 
     this->mVolume->SetMapper(volumeMapper);
     this->mVolume->SetProperty(volumeProperty);
-
-    // this->mVolume->SetMapper(volumeMapper);
-    // this->mVolume->GetProperty()->SetColor(colorTransferFunction);
-    // this->mVolume->GetProperty()->SetScalarOpacity(opacityTransferFunction);
-
-    // this->mActor->SetMapper(mapper);
-    // this->mActor->GetProperty()->SetRepresentationToWireframe();
 }
 
 void Mantle::Update()
