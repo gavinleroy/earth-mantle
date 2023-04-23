@@ -9,10 +9,9 @@ Mantle::Mantle(std::filesystem::path data_dir)
 }
 
 Mantle::Mantle()
-    : Mantle(
-        "/Users/raphaelwinkler/CLionProjects/earth-mantle/data/FullMantle") /* FIXME we need this to
-                                                                     be absolute from the
-                                                                     ROOT_DIR */
+    : Mantle("../data/FullMantle") /* FIXME we need this to
+                                                                          be absolute from
+                                      the ROOT_DIR */
 {
     /* TODO */
 }

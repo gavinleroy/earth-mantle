@@ -55,6 +55,7 @@ void Window::Loop()
 {
     auto start = std::chrono::high_resolution_clock::now();
     auto last  = start;
+
     while (mRenderWindow->GetGenericWindowId()) {
         // compute the timing deltas
         auto   now = std::chrono::high_resolution_clock::now();
@@ -69,6 +70,7 @@ void Window::Loop()
         mRenderWindow->Render();
         mRenderWindowInteractor->ProcessEvents();
     }
+
     mRenderWindow->Finalize();
     mRenderWindow->GetInteractor()->TerminateApp();
 }
