@@ -61,7 +61,7 @@ Volumes::Volumes()
 
     vtkSmartPointer<vtkPlane> plane = vtkSmartPointer<vtkPlane>::New();
     plane->SetOrigin(0., 0., 0.);
-    plane->SetNormal(0., 1.0, -1.);
+    plane->SetNormal(0., 1.0, 0);
 
 
     // Add a mapper to create graphic primitives from the data
@@ -77,6 +77,8 @@ Volumes::Volumes()
 
     this->mVolume->SetMapper(volumeMapper);
     this->mVolume->SetProperty(volumeProperty);
+    // TODO adjust this offset so the scene looks nice
+    this->mVolume->SetPosition(14000, 0, 14000);
 }
 
 

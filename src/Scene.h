@@ -35,8 +35,8 @@ public:
         // for (auto actor : mMantle->GetActors())
         //     renderer->AddActor(actor);
 
-        // for (auto volume : volumes->GetVolumes())
-        //     renderer->AddVolume(volume);
+        for (auto volume : volumes->GetVolumes())
+            renderer->AddVolume(volume);
 
         for (auto actor : tube->GetActors())
             renderer->AddActor(actor);

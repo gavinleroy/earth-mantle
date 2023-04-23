@@ -49,7 +49,7 @@ LineIntegralConvolution::LineIntegralConvolution()
     // Slice the geometry
     auto clippingPlane = vtkSmartPointer<vtkPlane>::New();
     clippingPlane->SetOrigin(0., 0., 0);
-    clippingPlane->SetNormal(0., 1.0, -1.0);
+    clippingPlane->SetNormal(0., 1.0, 0);
     licMapper->AddClippingPlane(clippingPlane);
 
     // Actor
