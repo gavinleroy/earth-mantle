@@ -1,4 +1,4 @@
-#include "Tube.h"
+#include "tube.h"
 
 Tube::Tube()
     : mVolume(vtkSmartPointer<vtkVolume>::New())
@@ -47,14 +47,14 @@ void Tube::LoadTubeSet(std::filesystem::path data_dir)
 
     auto loaded_from_file = LoadFromFile(fn);
 
-    vtkNew<vtkCellDataToPointData> cellToPoint;
-    cellToPoint->SetInputData(loaded_from_file);
-    cellToPoint->Update();
-
-    auto structured_grid = cellToPoint->GetStructuredGridOutput();
+//    vtkNew<vtkCellDataToPointData> cellToPoint;
+//    cellToPoint->SetInputData(loaded_from_file);
+//    cellToPoint->Update();
+//
+//    auto structured_grid = cellToPoint->GetStructuredGridOutput();
 
     vtkNew<vtkResampleToImage> resampler;
-    resampler->SetInputDataObject(structured_grid);
+    resampler->SetInputDataObject(loaded_from_file);
     resampler->SetSamplingDimensions(100, 100, 100);
     resampler->Update();
 
@@ -62,17 +62,6 @@ void Tube::LoadTubeSet(std::filesystem::path data_dir)
     resampler->GetOutput()->Print(std::cout);
 #endif
 
-    // Update the calculator filter
-    //    vtkNew<vtkAssignAttribute> assignAttribute;
-    //    assignAttribute->SetInputConnection(resampler->GetOutputPort());
-    //    std::for_each(
-    //            std::rbegin(this->include), std::rend(this->include),
-    //            [&](auto const &value) { assignAttribute->Assign(value.c_str(),
-    //            "SCALARS", "POINT_DATA"); });
-    //    assignAttribute->Update();
-    //
-    //
-    //    assignAttribute->Print(std::cout);
     vtkSmartPointer<vtkArrayCalculator> calculator
         = vtkSmartPointer<vtkArrayCalculator>::New();
     calculator->SetInputConnection(resampler->GetOutputPort());
@@ -82,22 +71,19 @@ void Tube::LoadTubeSet(std::filesystem::path data_dir)
     calculator->AddScalarVariable("vz", "vz");
     calculator->SetFunction("(iHat * vx + jHat * vy + kHat * vz) * 1e9");
     calculator->Update();
-
-    calculator->GetOutput()->Print(std::cout);
-
-//    vtkSmartPointer<vtkImageData> data = vtkImageData::SafeDownCast(calculator->GetOutput());
-//    data->Print(std::cout);
-
 //
-//    vtkNew<vtkAssignAttribute> assignAttribute;
-//    assignAttribute->SetInputData(data);
-//    assignAttribute->Assign("velocity", "VECTORS", "POINT_DATA");
-//    assignAttribute->Update();
+//    calculator->GetOutput()->Print(std::cout);
 
     vtkSmartPointer<vtkLineSource> line = vtkSmartPointer<vtkLineSource>::New();
     line->SetResolution(1000);
     line->SetPoint1(-6378., -6378., -6378.);
     line->SetPoint2(6435, 5683, 6414);
+
+
+//    vtkNew<vtkAssignAttribute> assignAttribute;
+//    assignAttribute->SetInputConnection(calculator->GetOutputPort());
+//    assignAttribute->Assign("velocity", "VECTORS", "CELL_DATA");
+//    assignAttribute->Update();
 
     vtkSmartPointer<vtkStreamTracer> tracer = vtkSmartPointer<vtkStreamTracer>::New();
     tracer->SetInputConnection(calculator->GetOutputPort());
@@ -115,17 +101,11 @@ void Tube::LoadTubeSet(std::filesystem::path data_dir)
     tracer->SetIntegratorTypeToRungeKutta45();
     tracer->Update();
     tracer->GetOutput()->Print(std::cout);
-
-
-    vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-    mapper->SetInputConnection(tracer->GetOutputPort());
-
-    mActor->SetMapper(mapper);
-
-    vtkSmartPointer<vtkPolyData> streamlines = vtkSmartPointer<vtkPolyData>::New();
-    streamlines->ShallowCopy(tracer->GetOutput());
-
-    std::cout << streamlines->GetNumberOfPoints() << std::endl;
+//
+//    vtkSmartPointer<vtkPolyData> streamlines = vtkSmartPointer<vtkPolyData>::New();
+//    streamlines->ShallowCopy(tracer->GetOutput());
+//
+//    std::cout << streamlines->GetNumberOfPoints() << std::endl;
 
     vtkSmartPointer<vtkTubeFilter> tubeFilter = vtkSmartPointer<vtkTubeFilter>::New();
     tubeFilter->SetInputConnection(tracer->GetOutputPort());
@@ -134,7 +114,10 @@ void Tube::LoadTubeSet(std::filesystem::path data_dir)
     tubeFilter->CappingOn();
     tubeFilter->Update();
 
+    vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    mapper->SetInputConnection(tubeFilter->GetOutputPort());
 
+    mActor->SetMapper(mapper);
 //    vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 //    mapper->SetInputConnection(tubeFilter->GetOutputPort());
 //
