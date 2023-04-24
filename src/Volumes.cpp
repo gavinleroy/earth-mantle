@@ -42,16 +42,25 @@ Volumes::Volumes()
     assignAttribute->GetOutput()->Print(std::cout);
 #endif
 
+    auto* range = new double[2];
+    range[0] = 0.;
+    range[1] = 3610.;
     // Create a color transfer function
     vtkNew<vtkColorTransferFunction> colorTransferFunction;
-    colorTransferFunction->AddRGBPoint(293, 0.0, 0.0, 1.0);
-    colorTransferFunction->AddRGBPoint(1200, 1.0, 1.0, 1.0);
-    colorTransferFunction->AddRGBPoint(3608, 1.0, 0.0, 0.0);
+    colorTransferFunction->SetNanOpacity(1.0);
+    colorTransferFunction->SetColorSpaceToRGB();
+    colorTransferFunction->SetScaleToLinear();
+    colorTransferFunction->AdjustRange(range);
+    colorTransferFunction->AddRGBPoint(0, 0., 1., 1.);
+    colorTransferFunction->AddRGBPoint(1623, 0., 0., 1.);
+    colorTransferFunction->AddRGBPoint(1803, 0., 0., 0.);
+    colorTransferFunction->AddRGBPoint(1995, 1.0, 0., 0.);
+    colorTransferFunction->AddRGBPoint(3608, 1.0, 1.0, 0.0);
 
     // Create a piecewise function
     vtkNew<vtkPiecewiseFunction> opacityTransferFunction;
-    opacityTransferFunction->AddPoint(293, 1.0);
-    opacityTransferFunction->AddPoint(3608, 1.0);
+    opacityTransferFunction->AddPoint(0, 0.8);
+    opacityTransferFunction->AddPoint(3608, 0.8);
 
     vtkNew<vtkVolumeProperty> volumeProperty;
     volumeProperty->ShadeOn();
