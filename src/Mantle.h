@@ -1,5 +1,7 @@
 #pragma once
 
+// TODO: these are horrible, they should really
+// only be in a single place.
 #include <vtkPolyDataMapper.h>
 #include <vtkActor.h>
 #include <vtkProperty.h>
@@ -43,42 +45,118 @@
 #include <vtkImageDataGeometryFilter.h>
 #include <vtkScalarsToColors.h>
 #include <vtkLookupTable.h>
+#include <vtkAlgorithm.h>
 
+#include <iterator>
+#include <sstream>
 #include <filesystem>
 
-class Mantle {
-private:
-    Mantle(const Mantle &) = delete;          // Delete the copy-constructor.
-    void operator=(const Mantle &) = delete;  // Delete the assignment operator.
 
-    inline const static std::vector<std::string> variables = std::vector<std::string>(
-        { "lon", "lat", "r", "vx", "vy", "vz", "thermal conductivity",
-          "thermal expansivity", "spin transition-induced density anomaly",
-          "temperature anomaly" });
+namespace MantleIO {
+    using cached_data                 = std::optional<vtkSmartPointer<vtkAlgorithm>>;
+    inline const size_t MAX_TIMESTEPS = 999;
 
-    std::filesystem::path data_directory;
+    // NOTE: you shouldn't use auto when using a MantleAttr
+    class MantleAttr {
+    public:
+        enum Value : uint8_t {
+            // ----------------------------------------
+            // The next three are the axis definitions
+            Lon,
+            Lat,
+            Radius,
 
-    vtkSmartPointer<vtkVolume> mVolume;
-    vtkSmartPointer<vtkActor>  mActor;
+            // ----------------------------------------
+            // Below this line are readable attributes
+            Vx,
+            Vy,
+            Vz,
+            Temp,
+            ThermCond,
+            ThermExp,
+            SpinAnom,
+            TempAnom
+        };
 
-protected:
-    vtkSmartPointer<vtkDataObject> LoadFromFile(const std::string              fn,
-                                                const std::vector<std::string> variables);
+        MantleAttr() = default;
+        constexpr MantleAttr(Value a)
+            : value(a)
+        {
+        }
 
-public:
-    Mantle(std::filesystem::path data_directory);
-    Mantle();
 
-    /// Getters for retrieving internal objects.
-    /// TODO: not sure if we actually want to have both
-    ///       actors and volumes at play, but I(gavin)
-    ///       don't know when we need one vs the other.
-    std::vector<vtkSmartPointer<vtkActor>>  GetActors();
-    std::vector<vtkSmartPointer<vtkVolume>> GetVolumes();
+        explicit operator bool() const = delete;
 
-    void LoadMantleSeries();
+        constexpr bool operator==(MantleAttr a) const
+        {
+            return value == a.value;
+        }
 
-    void LoadMantleFiles(std::filesystem::path data_dir);
+        constexpr bool operator!=(MantleAttr a) const
+        {
+            return value != a.value;
+        }
 
-    void Update();
-};
+        const std::string str() const
+        {
+            return std::string(this->c_str());
+        }
+
+        const char *c_str() const
+        {
+            switch (this->value) {
+            case Value::Lon:
+                return "lon";
+            case Value::Lat:
+                return "lat";
+            case Value::Radius:
+                return "r";
+            case Value::Vx:
+                return "vx";
+            case Value::Vy:
+                return "vy";
+            case Value::Vz:
+                return "vz";
+            case Value::ThermCond:
+                return "thermal conductivity";
+            case Value::ThermExp:
+                return "thermal expansivity";
+            case Value::SpinAnom:
+                return "spin transition-induced density anomaly";
+            case Value::TempAnom:
+                return "temperature anomaly";
+            case Value::Temp:
+                return "temperature";
+            }
+        }
+
+        static std::vector<MantleAttr> values();
+
+    private:
+        Value value;
+    };
+
+
+    class Mantle {
+    private:
+        inline static const std::filesystem::path data_directory   = "../data/FullMantle";
+        inline static size_t                      current_timestep = 1;
+
+        // Using a global reader will require us to reread the data from file,
+        // if we switch to preprocessed textures (or images) we could get away with
+        // loading the files in the background (or caching them if someone has a HUGE ram).
+        inline static vtkSmartPointer<vtkNetCDFCFReader> globalReader = nullptr;
+        // inline static std::array<cached_data, MAX_TIMESTEPS> cache
+        //     = std::array<cached_data, MAX_TIMESTEPS>();
+
+        static std::filesystem::path LocateFile(size_t time_step);
+
+    protected:
+        static vtkSmartPointer<vtkAlgorithm> GetCurrentStream();
+
+    public:
+        Mantle();
+        static void Step();
+    };
+
+}

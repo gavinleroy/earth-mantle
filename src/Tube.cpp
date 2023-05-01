@@ -5,13 +5,7 @@ Tube::Tube()
     : Mantle()
     , streamlineActor(vtkSmartPointer<vtkActor>::New())
 {
-    auto variables = std::vector<std::string>({
-        "vx",
-        "vy",
-        "vz",
-    });
-
-    auto structuredGrid = LoadFromFile("spherical001.nc", variables);
+    auto structuredGrid = GetCurrentStream();
 
     vtkNew<vtkLookupTable> ctf;
     ctf->SetVectorMode(vtkScalarsToColors::MAGNITUDE);
@@ -20,8 +14,7 @@ Tube::Tube()
     ctf->SetSaturationRange(1, 1);
 
     vtkNew<vtkCellDataToPointData> cellToPoint;
-    cellToPoint->SetInputData(structuredGrid);
-    cellToPoint->Update();
+    cellToPoint->SetInputConnection(structuredGrid->GetOutputPort());
 
     vtkNew<vtkArrayCalculator> calculator;
     calculator->SetInputConnection(cellToPoint->GetOutputPort());
@@ -40,7 +33,6 @@ Tube::Tube()
     assignAttribute->SetInputConnection(calculator->GetOutputPort());
     assignAttribute->Assign("velocity", vtkDataSetAttributes::SCALARS,
                             vtkAssignAttribute::POINT_DATA);
-    assignAttribute->Update();
 
     vtkNew<vtkStreamTracer> tracer;
     tracer->SetInputConnection(assignAttribute->GetOutputPort());
@@ -75,18 +67,10 @@ Tube::Tube()
 }
 
 
-void Tube::Update()
-{ /* UNIMPLEMENTED */
-}
+void Tube::Update() { }
 
-// TODO:
-std::vector<vtkSmartPointer<vtkActor>> Tube::GetActors()
+
+void Tube::ConnectToScene(vtkSmartPointer<vtkRenderer> renderer)
 {
-    return std::vector<vtkSmartPointer<vtkActor>>({ this->streamlineActor });
-}
-
-
-std::vector<vtkSmartPointer<vtkVolume>> Tube::GetVolumes()
-{
-    return std::vector<vtkSmartPointer<vtkVolume>>();
+    renderer->AddActor(streamlineActor);
 }

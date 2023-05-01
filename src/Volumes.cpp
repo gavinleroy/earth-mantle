@@ -6,27 +6,17 @@ Volumes::Volumes()
     : Mantle()
     , mVolume(vtkSmartPointer<vtkVolume>::New())
 {
-    auto variables = std::vector<std::string>({
-        "temperature",
-        "vx",
-        "vy",
-        "vz",
-    });
-
-    std::string property = "temperature";
-
-    auto loaded_from_file = LoadFromFile("spherical001.nc", variables);
+    MantleIO::MantleAttr property = MantleIO::MantleAttr::Temp;
+    auto                 fromFile = GetCurrentStream();
 
     vtkNew<vtkCellDataToPointData> cellToPoint;
-    cellToPoint->SetInputData(loaded_from_file);
-    cellToPoint->Update();
+    cellToPoint->SetInputConnection(fromFile->GetOutputPort());
 
     auto structured_grid = cellToPoint->GetStructuredGridOutput();
 
     vtkNew<vtkResampleToImage> resampler;
-    resampler->SetInputDataObject(structured_grid);
+    resampler->SetInputConnection(cellToPoint->GetOutputPort());
     resampler->SetSamplingDimensions(100, 100, 100);
-    resampler->Update();
 
 #ifndef NDEBUG
     resampler->GetOutput()->Print(std::cout);
@@ -36,15 +26,13 @@ Volumes::Volumes()
     assignAttribute->SetInputConnection(resampler->GetOutputPort());
     assignAttribute->Assign(property.c_str(), vtkDataSetAttributes::SCALARS,
                             vtkAssignAttribute::POINT_DATA);
-    assignAttribute->Update();
 
 #ifndef NDEBUG
     assignAttribute->GetOutput()->Print(std::cout);
 #endif
 
-    auto* range = new double[2];
-    range[0] = 0.;
-    range[1] = 3610.;
+    double range[] = { 0., 3610. };
+
     // Create a color transfer function
     vtkNew<vtkColorTransferFunction> colorTransferFunction;
     colorTransferFunction->SetNanOpacity(1.0);
@@ -76,27 +64,24 @@ Volumes::Volumes()
     // Add a mapper to create graphic primitives from the data
     vtkNew<vtkSmartVolumeMapper> volumeMapper;
     volumeMapper->SetInputConnection(assignAttribute->GetOutputPort());
+#ifndef NDEBUG
+    std::cout << "Loading scalar array: " << property.c_str() << " for volume render"
+              << std::endl;
+#endif
     volumeMapper->SelectScalarArray(property.c_str());
     volumeMapper->AddClippingPlane(plane);
     // volumeMapper->SetBlendModeToIsoSurface();
     // volumeMapper->SetSampleDistance(4);
 
-    // HACK: this seems very specific to a single pipeline, I(gavin) don't
-    // know how this will interact with the other things we'll need.
-
     this->mVolume->SetMapper(volumeMapper);
     this->mVolume->SetProperty(volumeProperty);
     // TODO adjust this offset so the scene looks nice
-    this->mVolume->SetPosition(14000, 0, 14000);
+    // this->mVolume->SetPosition(14000, 0, 14000);
 }
 
-
-std::vector<vtkSmartPointer<vtkVolume>> Volumes::GetVolumes()
+void Volumes::ConnectToScene(vtkSmartPointer<vtkRenderer> renderer)
 {
-    return std::vector<vtkSmartPointer<vtkVolume>>({ this->mVolume });
+    renderer->AddVolume(mVolume);
 }
 
-void Volumes::Update()
-{
-    /* TODO */
-}
+void Volumes::Update() { }

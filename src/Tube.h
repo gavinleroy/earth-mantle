@@ -50,8 +50,9 @@
 #include <vtkNamedColors.h>
 
 #include "Mantle.h"
+#include "Pipeline.h"
 
-class Tube : private Mantle {
+class Tube : private MantleIO::Mantle, public Pipe::Pipeline {
 private:
     Tube(const Tube &) = delete;            // Delete the copy-constructor.
     void operator=(const Tube &) = delete;  // Delete the assignment operator.
@@ -60,9 +61,7 @@ private:
 
 public:
     Tube();
-
-    std::vector<vtkSmartPointer<vtkActor>>  GetActors();
-    std::vector<vtkSmartPointer<vtkVolume>> GetVolumes();
-
+    ~Tube() { }
     void Update();
+    void ConnectToScene(vtkSmartPointer<vtkRenderer> renderer);
 };

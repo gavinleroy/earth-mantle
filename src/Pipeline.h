@@ -1,5 +1,8 @@
 #pragma once
 
+#include <vtkRenderer.h>
+#include <vtkSmartPointer.h>
+
 #include <vtkPolyDataMapper.h>
 #include <vtkActor.h>
 #include <vtkProperty.h>
@@ -29,7 +32,7 @@
 #include <vtkStructuredGrid.h>
 #include <vtkPlane.h>
 #include <vtkCutter.h>
-#include <vtkClipPolyData.h>
+#include <vtkClipVolume.h>
 #include <vtkClipDataSet.h>
 #include <vtkStructuredGridGeometryFilter.h>
 #include <vtkPolyData.h>
@@ -37,21 +40,22 @@
 #include <vtkCellDataToPointData.h>
 #include <vtkFloatArray.h>
 #include <vtkFixedPointVolumeRayCastMapper.h>
+#include <vtkPlanes.h>
+#include <vtkTubeFilter.h>
+#include <vtkMarchingCubes.h>
+#include <vtkImageDataGeometryFilter.h>
+#include <vtkScalarsToColors.h>
+#include <vtkLookupTable.h>
+#include <vtkAlgorithm.h>
+#include <vtkArrayCalculator.h>
 
-#include "Mantle.h"
-#include "Pipeline.h"
+namespace Pipe {
+    class Pipeline {
+    public:
+        virtual ~Pipeline() { }
 
-class Volumes : private MantleIO::Mantle, public Pipe::Pipeline {
-private:
-    Volumes(const Volumes &) = delete;         // Delete the copy-constructor.
-    void operator=(const Volumes &) = delete;  // Delete the assignment operator.
-
-    vtkSmartPointer<vtkVolume> mVolume;
-
-public:
-    Volumes();
-    ~Volumes() { }
-
-    void Update();
-    void ConnectToScene(vtkSmartPointer<vtkRenderer> renderer);
-};
+        virtual void ConnectToScene(vtkSmartPointer<vtkRenderer> renderer) = 0;
+        // virtual void RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer) = 0;
+        virtual void Update() = 0;
+    };
+}

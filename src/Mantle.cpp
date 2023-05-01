@@ -1,82 +1,73 @@
 #include "Mantle.h"
 
-Mantle::Mantle(std::filesystem::path data_dir)
-    : data_directory(data_dir)
-    , mVolume(vtkSmartPointer<vtkVolume>::New())
-    , mActor(vtkSmartPointer<vtkActor>::New())
-{
-    /* TODO */
-}
+namespace MantleIO {
 
-Mantle::Mantle()
-    : Mantle("../data/FullMantle") /* FIXME we need this to
-                                                                          be absolute from
-                                      the ROOT_DIR */
-{
-    /* TODO */
-}
+    // TODO: one performance bottleneck is reading. We need to make the reader
+    // happen on a background worker so we don't block the window interaction
+    // while something is getting rendered.
+    Mantle::Mantle()
+    {
+        // XXX: only initialize global reader once.
+        if (globalReader != nullptr)
+            return;
 
-vtkSmartPointer<vtkDataObject> Mantle::LoadFromFile(
-    const std::string              fn,
-    const std::vector<std::string> to_load /* define polymorphism over computation */)
-{
-    std::filesystem::path resolved = this->data_directory.append(fn);
+        globalReader = vtkSmartPointer<vtkNetCDFCFReader>::New();
+        globalReader->SetFileName(LocateFile(current_timestep).c_str());
+        globalReader->UpdateMetaData();
+        globalReader->SetSphericalCoordinates(true);
+        globalReader->SetOutputTypeToStructured();
 
-    assert(std::filesystem::exists(resolved));
+        for (auto &value : MantleAttr::values())
+            globalReader->SetVariableArrayStatus(value.c_str(), 1);
 
 #ifndef NDEBUG
-    std::cout << "Loading variables from absolute (" << resolved << ")" << std::endl;
-    std::for_each(to_load.begin(), to_load.end(),
-                  [](auto const &value) { std::cout << "  - " << value << std::endl; });
+        std::cout << std::endl
+                  << "--- reading data file [" << current_timestep << "] --- "
+                  << std::endl;
+        globalReader->GetOutput()->Print(std::cout);
 #endif
+    }
 
-    vtkNew<vtkNetCDFCFReader> reader;
-    reader->SetFileName(resolved.c_str());
-    reader->UpdateMetaData();
-    reader->SetSphericalCoordinates(true);
-    reader->SetOutputTypeToStructured();
+    std::filesystem::path Mantle::LocateFile(size_t time_step)
+    {
+        std::stringstream ss = std::stringstream();
+        ss << "spherical" << std::setfill('0') << std::setw(3) << current_timestep
+           << ".nc";
 
-    auto set_to = [&reader](int v) {
-        return [&reader, v](auto const &value) {
-            reader->SetVariableArrayStatus(value.c_str(), v);
-        };
-    };
-
-    // Unset all available variables
-    std::for_each(this->variables.begin(), this->variables.end(), set_to(0));
-
-    // Explicitly set the variables we want
-    std::for_each(to_load.begin(), to_load.end(), set_to(1));
-
-    reader->Update();
+        std::filesystem::path stem     = std::filesystem::path(data_directory);
+        std::filesystem::path resolved = stem.append(ss.str());
 
 #ifndef NDEBUG
-    reader->GetOutput()->Print(std::cout);
+        std::cout << "Loading file: " << resolved << std::endl;
+        assert(std::filesystem::exists(resolved));
 #endif
 
-    return reader->GetOutput();
-}
+        return resolved;
+    }
 
-void Mantle::LoadMantleSeries(/* uses current data directory */)
-{
-    /* TODO */
-    throw "not yet implemented";
-}
+    vtkSmartPointer<vtkAlgorithm> Mantle::GetCurrentStream()
+    {
+        return globalReader;
+    }
 
-void Mantle::Update()
-{ /* UNIMPLEMENTED */
-}
+    void Mantle::Step()
+    {
+#ifndef NDEBUG
+        std::cout << "Stepping Mantle state" << std::endl;
+#endif
+        current_timestep += 1;
 
-// TODO:
-std::vector<vtkSmartPointer<vtkActor>> Mantle::GetActors()
-{
-    auto v = std::vector<vtkSmartPointer<vtkActor>>({ this->mActor });
-    return v;
-}
+        // Update where the reader is pointing.
+        globalReader->SetFileName(LocateFile(current_timestep).c_str());
+    }
 
-// TODO:
-std::vector<vtkSmartPointer<vtkVolume>> Mantle::GetVolumes()
-{
-    auto v = std::vector<vtkSmartPointer<vtkVolume>>({ this->mVolume });
-    return v;
+    // Dataset attributes
+
+    std::vector<MantleAttr> MantleAttr::values()
+    {
+        auto elems = std::vector<MantleAttr>();
+        for (int i = Value::Vx; i <= Value::TempAnom; ++i)
+            elems.push_back(MantleAttr(static_cast<Value>(i)));
+        return elems;
+    }
 }

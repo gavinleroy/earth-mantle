@@ -7,26 +7,23 @@ void PickingInteractorStyle::SetScene(std::shared_ptr<Scene> scene)
     mScene = scene;
 }
 
-// ------------------------
-// Window class
-
 // TODO: there seems to be a lot of functionality in the
 //       constructor, can we factor this out?
 Window::Window()
 {
     // create renderer
-    mRenderer = vtkSmartPointer<vtkRenderer>::New();
+    this->mRenderer = vtkSmartPointer<vtkRenderer>::New();
     mRenderer->SetBackground(.2, .2, .2);
     mRenderer->GetActiveCamera()->SetViewUp(0, 0, 1);
     mRenderer->GetActiveCamera()->SetPosition(0, -50000, 2);
     mRenderer->UseDepthPeelingOn();
 
     // create scene
-    mScene = std::make_shared<Scene>();
+    this->mScene = std::make_shared<Scene>();
     mScene->InitRenderer(mRenderer);
 
     // create render window
-    mRenderWindow = vtkSmartPointer<vtkRenderWindow>::New();
+    this->mRenderWindow = vtkSmartPointer<vtkRenderWindow>::New();
     mRenderWindow->SetSize(800, 600);
     mRenderWindow->AddRenderer(mRenderer);
 
@@ -37,7 +34,7 @@ Window::Window()
     mRenderer->ResetCamera();
 
     // create interactor
-    mRenderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+    this->mRenderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
     mRenderWindowInteractor->SetInteractorStyle(interactorStyle);
     mRenderWindowInteractor->SetRenderWindow(mRenderWindow);
     mRenderWindowInteractor->EnableRenderOff();
@@ -56,15 +53,21 @@ void Window::Loop()
     auto start = std::chrono::high_resolution_clock::now();
     auto last  = start;
 
+    std::chrono::duration<double, std::milli> delay = std::chrono::minutes(2);
+
     while (mRenderWindow->GetGenericWindowId()) {
         // compute the timing deltas
-        auto   now = std::chrono::high_resolution_clock::now();
-        double dt  = std::chrono::duration<double, std::milli>(now - last).count();
-        double t   = std::chrono::duration<double, std::milli>(now - start).count();
-        last       = now;
+        auto now = std::chrono::high_resolution_clock::now();
+        auto dt  = std::chrono::duration<double, std::milli>(now - last);
+        auto t   = std::chrono::duration<double, std::milli>(now - start);
 
-        // update the scene
-        mScene->Update(dt, t);
+        if (dt > delay) {
+            MantleIO::Mantle::Step();
+
+            // update the scene
+            mScene->Update(dt.count(), t.count());
+            last = now;
+        }
 
         // render the frame anew
         mRenderWindow->Render();
