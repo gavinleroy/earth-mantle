@@ -6,7 +6,7 @@ Scene::Scene()
 
     // Insert all objects (currently no dynamic toggle).
     // pipelines.push_back(std::move(std::make_unique<Tube>()));
-    pipelines.push_back(std::move(std::make_unique<Volumes>()));
+    // pipelines.push_back(std::move(std::make_unique<Volumes>()));
     // pipelines.push_back(std::move(std::make_unique<LIConvolution>()));
 }
 

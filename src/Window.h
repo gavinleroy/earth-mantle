@@ -16,14 +16,31 @@
 
 #include "Scene.h"
 
-class PickingInteractorStyle : public vtkInteractorStyleTerrain {
-private:
-    std::shared_ptr<Scene> mScene;  // Scene containing all elements of the 3D scene.
-
+// Define interaction style
+class KeyPressInteractorStyle : public vtkInteractorStyleTrackballCamera
+{
 public:
-    static PickingInteractorStyle *New();
-    vtkTypeMacro(PickingInteractorStyle, vtkInteractorStyleTerrain);
-    void SetScene(std::shared_ptr<Scene> scene);
+  static KeyPressInteractorStyle* New();
+  vtkTypeMacro(KeyPressInteractorStyle, vtkInteractorStyleTrackballCamera);
+
+  virtual void OnKeyPress() override
+  {
+    // Get the keypress
+    vtkRenderWindowInteractor* rwi = this->Interactor;
+    std::string key = rwi->GetKeySym();
+
+    // Output the key that was pressed
+    std::cout << "Pressed " << key << std::endl;
+
+    // Handle a "normal" key
+    if (key == "a")
+    {
+        std::cout << "The a key was pressed." << std::endl;
+    }
+
+    // Forward events
+    vtkInteractorStyleTrackballCamera::OnKeyPress();
+    }
 };
 
 class Window {
