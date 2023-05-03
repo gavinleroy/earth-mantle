@@ -50,6 +50,7 @@
 #include <iterator>
 #include <sstream>
 #include <filesystem>
+#include <optional>
 
 
 namespace MantleIO {
@@ -127,6 +128,8 @@ namespace MantleIO {
                 return "temperature anomaly";
             case Value::Temp:
                 return "temperature";
+            default:
+                return "unknown";
             }
         }
 
