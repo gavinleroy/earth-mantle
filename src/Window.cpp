@@ -1,6 +1,11 @@
 #include "Window.h"
 
-vtkStandardNewMacro(KeyPressInteractorStyle);
+vtkStandardNewMacro(PickingInteractorStyle);
+
+void PickingInteractorStyle::SetScene(std::shared_ptr<Scene> scene)
+{
+    mScene = scene;
+}
 
 // TODO: there seems to be a lot of functionality in the
 //       constructor, can we factor this out?
@@ -23,9 +28,9 @@ Window::Window()
     mRenderWindow->AddRenderer(mRenderer);
 
     // create picking style
-    vtkNew<KeyPressInteractorStyle> interactorStyle;
+    vtkNew<PickingInteractorStyle> interactorStyle;
     interactorStyle->SetDefaultRenderer(mRenderer);
-    //interactorStyle->SetScene(mScene);
+    interactorStyle->SetScene(mScene);
     mRenderer->ResetCamera();
 
     // create interactor
@@ -62,6 +67,13 @@ void Window::Loop()
             // update the scene
             mScene->Update(dt.count(), t.count());
             last = now;
+        }
+        
+        char input = mRenderWindowInteractor->GetKeyCode();
+        if (input != '\0'){
+            std::cout << input << std::endl;
+            mRenderWindowInteractor->SetKeyCode('\0');
+            mScene->ProcessInput(input);
         }
 
         // render the frame anew

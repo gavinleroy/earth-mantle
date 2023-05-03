@@ -10,37 +10,17 @@
 #include <vtkInteractorStyleTerrain.h>
 #include <vtkCamera.h>
 #include <vtkMatrix4x4.h>
-#include <vtkInteractorStyleTrackballCamera.h>
-#include <vtkNew.h>
-#include <vtkObjectFactory.h>
 
 #include "Scene.h"
 
-// Define interaction style
-class KeyPressInteractorStyle : public vtkInteractorStyleTrackballCamera
-{
+class PickingInteractorStyle : public vtkInteractorStyleTerrain {
+private:
+    std::shared_ptr<Scene> mScene;  // Scene containing all elements of the 3D scene.
+
 public:
-  static KeyPressInteractorStyle* New();
-  vtkTypeMacro(KeyPressInteractorStyle, vtkInteractorStyleTrackballCamera);
-
-  virtual void OnKeyPress() override
-  {
-    // Get the keypress
-    vtkRenderWindowInteractor* rwi = this->Interactor;
-    std::string key = rwi->GetKeySym();
-
-    // Output the key that was pressed
-    std::cout << "Pressed " << key << std::endl;
-
-    // Handle a "normal" key
-    if (key == "a")
-    {
-        std::cout << "The a key was pressed." << std::endl;
-    }
-
-    // Forward events
-    vtkInteractorStyleTrackballCamera::OnKeyPress();
-    }
+    static PickingInteractorStyle *New();
+    vtkTypeMacro(PickingInteractorStyle, vtkInteractorStyleTerrain);
+    void SetScene(std::shared_ptr<Scene> scene);
 };
 
 class Window {
