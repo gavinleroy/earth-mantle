@@ -2,6 +2,8 @@
 
 
 #include <memory>
+#include <string>
+#include <iostream>
 
 #include <vtkLight.h>
 #include <vtkRenderer.h>

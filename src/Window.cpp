@@ -1,11 +1,44 @@
 #include "Window.h"
 
-vtkStandardNewMacro(PickingInteractorStyle);
-
-void PickingInteractorStyle::SetScene(std::shared_ptr<Scene> scene)
+// Define interaction style
+class KeyPressInteractorStyle : public vtkInteractorStyleTrackballCamera
 {
-    mScene = scene;
-}
+public:
+  static KeyPressInteractorStyle* New();
+  vtkTypeMacro(KeyPressInteractorStyle, vtkInteractorStyleTrackballCamera);
+
+  virtual void OnKeyPress() override
+  {
+    // Get the keypress
+    vtkRenderWindowInteractor* rwi = this->Interactor;
+    std::string key = rwi->GetKeySym();
+
+    // Output the key that was pressed
+    std::cout << "Pressed " << key << std::endl;
+
+    // Handle an arrow key
+    if (key == "Up")
+    {
+        std::cout << "The up arrow was pressed." << std::endl;
+    }
+
+    // Handle a "normal" key
+    if (key == "a")
+    {
+        std::cout << "The a key was pressed." << std::endl;
+    }
+
+    // Forward events
+    vtkInteractorStyleTrackballCamera::OnKeyPress();
+    }
+
+    //void SetScene(std::shared_ptr<Scene> scene)
+    //{
+    //    mScene = scene;
+    //}
+};
+vtkStandardNewMacro(KeyPressInteractorStyle);
+
 
 // TODO: there seems to be a lot of functionality in the
 //       constructor, can we factor this out?
@@ -28,9 +61,9 @@ Window::Window()
     mRenderWindow->AddRenderer(mRenderer);
 
     // create picking style
-    vtkNew<PickingInteractorStyle> interactorStyle;
+    vtkNew<KeyPressInteractorStyle> interactorStyle;
     interactorStyle->SetDefaultRenderer(mRenderer);
-    interactorStyle->SetScene(mScene);
+    //interactorStyle->SetScene(mScene);
     mRenderer->ResetCamera();
 
     // create interactor

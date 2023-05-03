@@ -10,6 +10,9 @@
 #include <vtkInteractorStyleTerrain.h>
 #include <vtkCamera.h>
 #include <vtkMatrix4x4.h>
+#include <vtkInteractorStyleTrackballCamera.h>
+#include <vtkNew.h>
+#include <vtkObjectFactory.h>
 
 #include "Scene.h"
 
