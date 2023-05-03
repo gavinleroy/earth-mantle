@@ -28,5 +28,6 @@ public:
     void InitRenderer(vtkSmartPointer<vtkRenderer> renderer);
     void InitUI(vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor);
     void ProcessInput(char input);
+    void SwitchPipeline(int index);
     void Update(double dt, double t);
 };

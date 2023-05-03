@@ -4,10 +4,8 @@ Scene::Scene()
 {
     pipelines = std::vector<std::unique_ptr<Pipe::Pipeline>>();
 
-    // Insert all objects (currently no dynamic toggle).
-    // pipelines.push_back(std::move(std::make_unique<Tube>()));
-    // pipelines.push_back(std::move(std::make_unique<Volumes>()));
-    // pipelines.push_back(std::move(std::make_unique<LIConvolution>()));
+    // TODO: initialize scene with a default pipeline
+    // pipelines.push_back(std::move(std::make_unique<Wireframe>()));
 }
 
 void Scene::InitRenderer(vtkSmartPointer<vtkRenderer> renderer)
@@ -51,7 +49,7 @@ void Scene::ProcessInput(char input)
         pipelines.back()->ConnectToScene(this->renderer);
     }
     if (input == 'w') {
-        // add wireframe
+        // toggle wireframe
         // -- I think this should be loaded when scene is initialized (Rasmus)
     }
 
@@ -64,6 +62,11 @@ void Scene::ProcessInput(char input)
     }
 
     // add more controls here if needed ...
+}
+
+void Scene::SwitchPipeline(int index)
+{
+    /* TODO */
 }
 
 void Scene::Update(double dt, double t)
