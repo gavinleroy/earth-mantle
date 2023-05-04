@@ -2,10 +2,11 @@
 
 Scene::Scene()
 {
+    //TODO: separate model from view
     pipelines = std::vector<std::unique_ptr<Pipe::Pipeline>>();
 
     // TODO: initialize scene with a default pipeline
-    // pipelines.push_back(std::move(std::make_unique<Wireframe>()));
+    // pipelines.push_back(std::move(std::make_unique<Globe>()));
 }
 
 void Scene::InitRenderer(vtkSmartPointer<vtkRenderer> renderer)
@@ -50,7 +51,6 @@ void Scene::ProcessInput(char input)
     }
     if (input == 'w') {
         // toggle wireframe
-        // -- I think this should be loaded when scene is initialized (Rasmus)
     }
 
     // TODO: add contols for time stepping
