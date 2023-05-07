@@ -23,6 +23,30 @@ public:
     void SetScene(std::shared_ptr<Scene> scene);
 };
 
+class KeyPressObserver : public vtkCommand {
+public:
+    static KeyPressObserver* New() {
+        return new KeyPressObserver();
+    }
+
+    void Execute(vtkObject* caller, unsigned long eventId, void* callData) override {
+        if (eventId == vtkCommand::KeyPressEvent) {
+            vtkRenderWindowInteractor* interactor = vtkRenderWindowInteractor::SafeDownCast(caller);
+            if (interactor) {
+                char* key = interactor->GetKeySym();
+                mScene->ProcessInput(key);
+            }
+        }
+    }
+
+    void SetScene(std::shared_ptr<Scene> scene) {
+        mScene = scene;
+    }
+
+private:
+    std::shared_ptr<Scene> mScene;
+};
+
 class Window {
 private:
     vtkSmartPointer<vtkRenderer>     mRenderer;      // Renderer that contains the scene.

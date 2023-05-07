@@ -33,9 +33,14 @@ Window::Window()
     interactorStyle->SetScene(mScene);
     mRenderer->ResetCamera();
 
+    // create key press observer
+    vtkNew<KeyPressObserver> keyPressObserver;
+    keyPressObserver->SetScene(mScene);
+
     // create interactor
     this->mRenderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
     mRenderWindowInteractor->SetInteractorStyle(interactorStyle);
+    mRenderWindowInteractor->AddObserver(vtkCommand::KeyPressEvent, keyPressObserver);
     mRenderWindowInteractor->SetRenderWindow(mRenderWindow);
     mRenderWindowInteractor->EnableRenderOff();
     mRenderWindowInteractor->Initialize();
@@ -67,13 +72,6 @@ void Window::Loop()
             // update the scene
             mScene->Update(dt.count(), t.count());
             last = now;
-        }
-        
-        char input = mRenderWindowInteractor->GetKeyCode();
-        if (input != '\0'){
-            std::cout << input << std::endl;
-            mRenderWindowInteractor->SetKeyCode('\0');
-            mScene->ProcessInput(input);
         }
 
         // render the frame anew
