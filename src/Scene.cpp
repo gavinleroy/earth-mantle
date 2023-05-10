@@ -36,32 +36,26 @@ void Scene::ProcessInput(char* input)
 
 void Scene::SwitchPipeline(int index)
 {
+    this->renderer->RemoveAllViewProps();
     if (pipelines[index] != nullptr) {
         std::cout << "Pipeline already exists." << std::endl;
-        return;
     }
-    std::string pipelineType = "None";
     switch(index) {
         case 0:
-            pipelineType = "LIConvolution";
             pipelines[0] = std::make_unique<LIConvolution>();
             break;
         case 1:
-            pipelineType = "Tube";
             pipelines[1] = std::make_unique<Tube>();
             break;
         case 2:
-            pipelineType = "Volumes";
-            std::cout << pipelineType << " pipeline created." << std::endl;
             pipelines[2] = std::move(std::make_unique<Volumes>());
             break;
         default:
             std::cout << "Invalid pipeline index." << std::endl;
             return;
     }
-    std::cout << pipelineType << " pipeline created." << std::endl;
+    std::cout << "Connecting pipeline to Scene." << std::endl;
     pipelines[index]->ConnectToScene(this->renderer);
-    std::cout << "Pipeline connected to Scene." << std::endl;
 }
 
 void Scene::Update(double dt, double t)
