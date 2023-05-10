@@ -3,34 +3,11 @@
 #include <vtkDataSetAttributes.h>
 
 Volumes::Volumes()
-    : Mantle()
+    : Resample()
     , mVolume(vtkSmartPointer<vtkVolume>::New())
 {
     MantleIO::MantleAttr property = MantleIO::MantleAttr::TempAnom;
-    auto                 fromFile = GetCurrentStream();
-
-    vtkNew<vtkCellDataToPointData> cellToPoint;
-    cellToPoint->SetInputConnection(fromFile->GetOutputPort());
-
-    auto structured_grid = cellToPoint->GetStructuredGridOutput();
-
-    vtkNew<vtkThreshold> thresholdFilter;
-    thresholdFilter->SetInputConnection(cellToPoint->GetOutputPort());
-    thresholdFilter->SetInputArrayToProcess(0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, property.c_str());
-    thresholdFilter->SetLowerThreshold(-2000.);
-    thresholdFilter->SetUpperThreshold(2000.);
-    thresholdFilter->SetThresholdFunction(vtkThreshold::THRESHOLD_BETWEEN);
-
-
-    vtkNew<vtkResampleToImage> resampler;
-    resampler->SetInputConnection(thresholdFilter->GetOutputPort());
-    resampler->SetSamplingDimensions(100, 100, 100);
-
-    resampler->Update();
-    resampler->GetOutput()->Print(std::cout);
-#ifndef NDEBUG
-    resampler->GetOutput()->Print(std::cout);
-#endif
+    auto resampler = Resample::GetResampled();
 
     vtkNew<vtkAssignAttribute> assignAttribute;
     assignAttribute->SetInputConnection(resampler->GetOutputPort());
