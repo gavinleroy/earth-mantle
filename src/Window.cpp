@@ -50,9 +50,6 @@ Window::Window()
     mRenderWindow->SetWindowName("Earth Mantle");
 }
 
-/// <summary>
-/// Render and update loop.
-/// </summary>
 void Window::Loop()
 {
     auto start = std::chrono::high_resolution_clock::now();
@@ -67,7 +64,7 @@ void Window::Loop()
         auto t   = std::chrono::duration<double, std::milli>(now - start);
 
         if (dt > delay) {
-            MantleIO::Mantle::Step();
+            // MantleIO::Mantle::Step();
 
             // update the scene
             mScene->Update(dt.count(), t.count());
