@@ -10,6 +10,9 @@
 #include <vtkInteractorStyleTerrain.h>
 #include <vtkCamera.h>
 #include <vtkMatrix4x4.h>
+#include <vtkLODActor.h>
+#include <vtkSphereSource.h>
+#include <vtkImplicitSelectionLoop.h>
 
 #include "Scene.h"
 
@@ -25,21 +28,25 @@ public:
 
 class KeyPressObserver : public vtkCommand {
 public:
-    static KeyPressObserver* New() {
+    static KeyPressObserver *New()
+    {
         return new KeyPressObserver();
     }
 
-    void Execute(vtkObject* caller, unsigned long eventId, void* callData) override {
+    void Execute(vtkObject *caller, unsigned long eventId, void *callData) override
+    {
         if (eventId == vtkCommand::KeyPressEvent) {
-            vtkRenderWindowInteractor* interactor = vtkRenderWindowInteractor::SafeDownCast(caller);
+            vtkRenderWindowInteractor *interactor
+                = vtkRenderWindowInteractor::SafeDownCast(caller);
             if (interactor) {
-                char* key = interactor->GetKeySym();
+                char *key = interactor->GetKeySym();
                 mScene->ProcessInput(key);
             }
         }
     }
 
-    void SetScene(std::shared_ptr<Scene> scene) {
+    void SetScene(std::shared_ptr<Scene> scene)
+    {
         mScene = scene;
     }
 

@@ -2,6 +2,7 @@
 
 LIConvolution::LIConvolution()
     : Mantle()
+    , mActor(vtkSmartPointer<vtkActor>::New())
 {
     auto fromFile = GetCurrentStream();
 
@@ -10,7 +11,7 @@ LIConvolution::LIConvolution()
     cellDataToPointData->SetInputConnection(fromFile->GetOutputPort());
 
     // Aggregate the velocity into one array
-    auto calculator = vtkSmartPointer<vtkArrayCalculator>::New();
+    vtkNew<vtkArrayCalculator> calculator;
     calculator->SetInputConnection(cellDataToPointData->GetOutputPort());
     calculator->SetResultArrayName("velocity");
     calculator->AddScalarVariable("vx", "vx");
@@ -19,33 +20,24 @@ LIConvolution::LIConvolution()
     calculator->SetFunction("(iHat * vx + jHat * vy + kHat * vz) * 1e9");
 
     // TODO do we need this? or can we do this without the intermediate geometry filter?
-    // Geometry filter
-    auto geometry = vtkSmartPointer<vtkGeometryFilter>::New();
+    vtkNew<vtkGeometryFilter> geometry;
     geometry->SetInputConnection(calculator->GetOutputPort());
-    vtkSmartPointer<vtkDataObject> dataObject = geometry->GetOutputDataObject(0);
 
     // Line integral convolution (LIC) mapper
-    auto licMapper = vtkSmartPointer<vtkSurfaceLICMapper>::New();
-    licMapper->SetInputConnection(calculator->GetOutputPort());
-    licMapper->SetInputDataObject(dataObject);
+    vtkNew<vtkSurfaceLICMapper> licMapper;
+    licMapper->SetInputConnection(geometry->GetOutputPort());
     licMapper->SetInputArrayToProcess(0, 0, 0, vtkDataObject::POINT, "velocity");
 
-    // LIC parameters
-    auto licInterface = licMapper->GetLICInterface();
     // Disable enhanced LIC (for now)
-    licInterface->SetEnhancedLIC(0);
+    licMapper->GetLICInterface()->SetEnhancedLIC(0);
 
     // Slice the geometry
-    auto clippingPlane = vtkSmartPointer<vtkPlane>::New();
+    vtkNew<vtkPlane> clippingPlane;
     clippingPlane->SetOrigin(0., 0., 0);
     clippingPlane->SetNormal(0., 1.0, 0);
-    licMapper->AddClippingPlane(clippingPlane);
 
-    // Actor
-    mActor = vtkSmartPointer<vtkActor>::New();
-    // TODO adjust this offset so the scene looks nice
-    mActor->SetPosition(14000, 0, 0);
-    mActor->SetMapper(licMapper);
+    licMapper->AddClippingPlane(clippingPlane);
+    this->mActor->SetMapper(licMapper);
 }
 
 void LIConvolution::ConnectToScene(vtkSmartPointer<vtkRenderer> renderer)
