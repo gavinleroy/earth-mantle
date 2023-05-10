@@ -71,4 +71,9 @@ void Volumes::ConnectToScene(vtkSmartPointer<vtkRenderer> renderer)
     renderer->AddVolume(mVolume);
 }
 
+void Volumes::RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer)
+{
+    renderer->RemoveVolume(mVolume);
+}
+
 void Volumes::Update() { }

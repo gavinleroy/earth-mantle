@@ -55,7 +55,7 @@ namespace Pipe {
         virtual ~Pipeline() { }
 
         virtual void ConnectToScene(vtkSmartPointer<vtkRenderer> renderer) = 0;
-        // virtual void RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer) = 0;
+        virtual void RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer) = 0;
         virtual void Update() = 0;
     };
 }

@@ -53,4 +53,9 @@ void LIConvolution::ConnectToScene(vtkSmartPointer<vtkRenderer> renderer)
     renderer->AddActor(mActor);
 }
 
+void LIConvolution::RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer)
+{
+    renderer->RemoveActor(mActor);
+}
+
 void LIConvolution::Update() { }

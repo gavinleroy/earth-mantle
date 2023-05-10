@@ -74,3 +74,8 @@ void Tube::ConnectToScene(vtkSmartPointer<vtkRenderer> renderer)
 {
     renderer->AddActor(streamlineActor);
 }
+
+void Tube::RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer)
+{
+    renderer->RemoveActor(streamlineActor);
+}
