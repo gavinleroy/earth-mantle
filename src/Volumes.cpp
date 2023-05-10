@@ -6,7 +6,7 @@ Volumes::Volumes()
     : Mantle()
     , mVolume(vtkSmartPointer<vtkVolume>::New())
 {
-    MantleIO::MantleAttr property = MantleIO::MantleAttr::Temp;
+    MantleIO::MantleAttr property = MantleIO::MantleAttr::TempAnom;
     auto                 fromFile = GetCurrentStream();
 
     vtkNew<vtkCellDataToPointData> cellToPoint;
@@ -14,10 +14,20 @@ Volumes::Volumes()
 
     auto structured_grid = cellToPoint->GetStructuredGridOutput();
 
+    vtkNew<vtkThreshold> thresholdFilter;
+    thresholdFilter->SetInputConnection(cellToPoint->GetOutputPort());
+    thresholdFilter->SetInputArrayToProcess(0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, property.c_str());
+    thresholdFilter->SetLowerThreshold(-2000.);
+    thresholdFilter->SetUpperThreshold(2000.);
+    thresholdFilter->SetThresholdFunction(vtkThreshold::THRESHOLD_BETWEEN);
+
+
     vtkNew<vtkResampleToImage> resampler;
-    resampler->SetInputConnection(cellToPoint->GetOutputPort());
+    resampler->SetInputConnection(thresholdFilter->GetOutputPort());
     resampler->SetSamplingDimensions(100, 100, 100);
 
+    resampler->Update();
+    resampler->GetOutput()->Print(std::cout);
 #ifndef NDEBUG
     resampler->GetOutput()->Print(std::cout);
 #endif
@@ -31,7 +41,7 @@ Volumes::Volumes()
     assignAttribute->GetOutput()->Print(std::cout);
 #endif
 
-    double range[] = { 0., 3610. };
+    double range[] = { -1100., 1100. };
 
     // Create a color transfer function
     vtkNew<vtkColorTransferFunction> colorTransferFunction;
@@ -39,11 +49,11 @@ Volumes::Volumes()
     colorTransferFunction->SetColorSpaceToRGB();
     colorTransferFunction->SetScaleToLinear();
     colorTransferFunction->AdjustRange(range);
-    colorTransferFunction->AddRGBPoint(0, 0., 1., 1.);
-    colorTransferFunction->AddRGBPoint(1623, 0., 0., 1.);
-    colorTransferFunction->AddRGBPoint(1803, 0., 0., 0.);
-    colorTransferFunction->AddRGBPoint(1995, 1.0, 0., 0.);
-    colorTransferFunction->AddRGBPoint(3608, 1.0, 1.0, 0.0);
+    colorTransferFunction->AddRGBPoint(-1100, 0., 0., 1.);
+    colorTransferFunction->AddRGBPoint(-150, 0., 1., 1.);
+    colorTransferFunction->AddRGBPoint(0, 1., 1., 1.);
+    colorTransferFunction->AddRGBPoint(150, 1., 1., 0.);
+    colorTransferFunction->AddRGBPoint(1100, 1.0, 0., 0.);
 
     // Create a piecewise function
     vtkNew<vtkPiecewiseFunction> opacityTransferFunction;
@@ -51,7 +61,7 @@ Volumes::Volumes()
     opacityTransferFunction->AddPoint(3608, 0.8);
 
     vtkNew<vtkVolumeProperty> volumeProperty;
-    volumeProperty->ShadeOn();
+    volumeProperty->ShadeOff();
     volumeProperty->SetInterpolationTypeToLinear();
     volumeProperty->SetColor(colorTransferFunction);
     volumeProperty->SetScalarOpacity(opacityTransferFunction);
