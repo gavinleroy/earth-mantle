@@ -37,6 +37,8 @@
 #include <vtkCellDataToPointData.h>
 #include <vtkFloatArray.h>
 #include <vtkFixedPointVolumeRayCastMapper.h>
+#include <vtkThreshold.h>
+#include <vtkUnstructuredGrid.h>
 
 #include "Mantle.h"
 #include "Pipeline.h"
