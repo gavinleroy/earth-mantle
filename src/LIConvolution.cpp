@@ -28,7 +28,8 @@ LIConvolution::LIConvolution()
     licMapper->SetInputConnection(geometry->GetOutputPort());
 
     // Overlay the temperature anomaly
-    licMapper->SelectColorArray("temperature anomaly");
+    MantleIO::MantleAttr tempAnom = MantleIO::MantleAttr::TempAnom;
+    licMapper->SelectColorArray(tempAnom.c_str());
     licMapper->SetScalarVisibility(true);
     licMapper->SetScalarModeToUsePointFieldData();
 
