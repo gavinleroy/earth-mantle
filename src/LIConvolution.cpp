@@ -27,16 +27,28 @@ LIConvolution::LIConvolution()
     vtkNew<vtkSurfaceLICMapper> licMapper;
     licMapper->SetInputConnection(geometry->GetOutputPort());
     licMapper->SetInputArrayToProcess(0, 0, 0, vtkDataObject::POINT, "velocity");
-
     // Disable enhanced LIC (for now)
-    licMapper->GetLICInterface()->SetEnhancedLIC(0);
+    licMapper->GetLICInterface()->SetEnhancedLIC(1);
 
+    double range[] = { -1100., 1100. };
+    vtkNew<vtkLookupTable> lookupTable;
+    lookupTable->SetHueRange(0.75, 0.);
+    lookupTable->SetValueRange(1., 1.);
+    lookupTable->SetSaturationRange(1., 1.);
+    lookupTable->SetRange(range);
+    lookupTable->Build();
+
+    MantleIO::MantleAttr temp_anom = MantleIO::MantleAttr::TempAnom;
+    licMapper->SelectColorArray(temp_anom.c_str());
+    licMapper->SetScalarVisibility(true);
+    licMapper->SetScalarModeToUsePointFieldData();
+    licMapper->SetLookupTable(lookupTable);
     // Slice the geometry
     vtkNew<vtkPlane> clippingPlane;
     clippingPlane->SetOrigin(0., 0., 0);
     clippingPlane->SetNormal(0., 1.0, 0);
 
-    licMapper->AddClippingPlane(clippingPlane);
+//    licMapper->AddClippingPlane(clippingPlane);
     this->mActor->SetMapper(licMapper);
 }
 
