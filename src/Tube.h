@@ -48,6 +48,11 @@
 #include <vtkLineSource.h>
 #include <vtkStructuredGridOutlineFilter.h>
 #include <vtkNamedColors.h>
+#include <vtkPointSource.h>
+#include <vtkThresholdPoints.h>
+#include <vtkColorTransferFunction.h>
+#include <vtkThreshold.h>
+#include <vtkMaskPoints.h>
 
 #include "Mantle.h"
 #include "Pipeline.h"
