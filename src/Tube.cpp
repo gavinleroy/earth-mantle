@@ -9,9 +9,9 @@ Tube::Tube()
 
     vtkNew<vtkLookupTable> ctf;
     ctf->SetVectorMode(vtkScalarsToColors::MAGNITUDE);
-    ctf->SetHueRange(0.667, 0.0);
+    ctf->SetHueRange(0.0, 0.2);
     ctf->SetValueRange(1, 1);
-    ctf->SetSaturationRange(1, 1);
+    ctf->SetSaturationRange(0.5, 0.5);
 
     vtkNew<vtkCellDataToPointData> cellToPoint;
     cellToPoint->SetInputConnection(structuredGrid->GetOutputPort());
@@ -54,7 +54,7 @@ Tube::Tube()
 
     vtkNew<vtkTubeFilter> tubes;
     tubes->SetInputConnection(tracer->GetOutputPort());
-    tubes->SetRadius(127.1);
+    tubes->SetRadius(60);
     tubes->SetNumberOfSides(6);
     tubes->CappingOn();
 
