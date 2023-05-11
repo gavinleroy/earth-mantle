@@ -24,6 +24,7 @@ public:
     static PickingInteractorStyle *New();
     vtkTypeMacro(PickingInteractorStyle, vtkInteractorStyleTerrain);
     void SetScene(std::shared_ptr<Scene> scene);
+    void OnChar() override {return;}
 };
 
 class KeyPressObserver : public vtkCommand {
