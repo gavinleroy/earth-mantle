@@ -19,17 +19,32 @@ LIConvolution::LIConvolution()
     calculator->AddScalarVariable("vz", "vz");
     calculator->SetFunction("(iHat * vx + jHat * vy + kHat * vz) * 1e9");
 
-    // TODO do we need this? or can we do this without the intermediate geometry filter?
+    // Extract the geometry
     vtkNew<vtkGeometryFilter> geometry;
     geometry->SetInputConnection(calculator->GetOutputPort());
 
     // Line integral convolution (LIC) mapper
     vtkNew<vtkSurfaceLICMapper> licMapper;
     licMapper->SetInputConnection(geometry->GetOutputPort());
-    licMapper->SetInputArrayToProcess(0, 0, 0, vtkDataObject::POINT, "velocity");
 
-    // Disable enhanced LIC (for now)
-    licMapper->GetLICInterface()->SetEnhancedLIC(0);
+    // Overlay the temperature anomaly
+    licMapper->SelectColorArray("temperature anomaly");
+    licMapper->SetScalarVisibility(true);
+    licMapper->SetScalarModeToUsePointFieldData();
+
+    // Create a color transfer function
+    vtkNew<vtkColorTransferFunction> colorTransferFunction;
+    colorTransferFunction->SetNanOpacity(1.0);
+    colorTransferFunction->SetColorSpaceToRGB();
+    colorTransferFunction->SetScaleToLinear();
+    double range[] = { -1100., 1100. };
+    colorTransferFunction->AdjustRange(range);
+    colorTransferFunction->AddRGBPoint(-1100, 0., 0., 1.);
+    colorTransferFunction->AddRGBPoint(-150, 0., 1., 1.);
+    colorTransferFunction->AddRGBPoint(0, 1., 1., 1.);
+    colorTransferFunction->AddRGBPoint(150, 1., 1., 0.);
+    colorTransferFunction->AddRGBPoint(1100, 1.0, 0., 0.);
+    licMapper->SetLookupTable(colorTransferFunction);
 
     // Slice the geometry
     vtkNew<vtkPlane> clippingPlane;
