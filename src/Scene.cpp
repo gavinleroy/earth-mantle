@@ -18,6 +18,7 @@ void Scene::InitUI(vtkSmartPointer<vtkRenderWindowInteractor> renderWindowIntera
     std::cout << "l: switch to LIConvolution pipeline" << std::endl;
     std::cout << "t: switch to Tube pipeline" << std::endl;
     std::cout << "v: switch to Volumes pipeline" << std::endl;
+    std::cout << "c: switch to Contour pipeline" << std::endl;
     //std::cout << "w: toggle wireframe" << std::endl;
     //std::cout << "s: step forward" << std::endl;
     //std::cout << "b: step backward" << std::endl;
@@ -30,6 +31,7 @@ void Scene::ProcessInput(char* input)
     if (strcmp(input, "l") == 0) SwitchPipeline(0);
     if (strcmp(input, "t") == 0) SwitchPipeline(1);
     if (strcmp(input, "v") == 0) SwitchPipeline(2);
+    if (strcmp(input, "c") == 0) SwitchPipeline(3);
 
     // add more controls here if needed ...
 }
@@ -53,6 +55,9 @@ void Scene::SwitchPipeline(int index)
                 break;
             case 2:
                 pipelines[2] = std::move(std::make_unique<Volumes>());
+                break;
+            case 3:
+                pipelines[3] = std::move(std::make_unique<Contour>());
                 break;
             default:
                 std::cout << "Invalid pipeline index." << std::endl;

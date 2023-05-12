@@ -14,6 +14,7 @@
 #include "Volumes.h"
 #include "LIConvolution.h"
 #include "Pipeline.h"
+#include "Contour.h"
 
 class Scene {
 private:
@@ -24,7 +25,7 @@ private:
         * 1: Tube
         * 2: Volumes
     */
-    std::unique_ptr<Pipe::Pipeline> pipelines[3];
+    std::unique_ptr<Pipe::Pipeline> pipelines[4];
     vtkSmartPointer<vtkRenderer> renderer;
 
 public:

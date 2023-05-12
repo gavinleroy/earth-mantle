@@ -3,7 +3,7 @@
 #include <vtkDataSetAttributes.h>
 
 Volumes::Volumes()
-    : Resample()
+    : Resample::Resample()
     , mVolume(vtkSmartPointer<vtkVolume>::New())
 {
     MantleIO::MantleAttr property = MantleIO::MantleAttr::TempAnom;
