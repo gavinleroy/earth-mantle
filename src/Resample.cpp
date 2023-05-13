@@ -15,7 +15,7 @@ namespace Resample {
 
         resampler = vtkSmartPointer<vtkResampleToImage>::New();
         resampler->SetInputConnection(cellToPoint->GetOutputPort());
-        resampler->SetSamplingDimensions(100, 100, 100);
+        resampler->SetSamplingDimensions(200, 200, 200);
 
 #ifndef NDEBUG
         resampler->Update();

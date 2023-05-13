@@ -13,7 +13,7 @@ private:
     Contour(const Contour &) = delete;
     void operator=(const Contour &) = delete;
 
-    inline static vtkSmartPointer<vtkActor> mContour = nullptr;;
+    inline static vtkSmartPointer<vtkActor> mContour = nullptr;
 
 public:
     Contour();

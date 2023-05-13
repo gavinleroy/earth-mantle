@@ -34,8 +34,8 @@ Volumes::Volumes()
 
     // Create a piecewise function
     vtkNew<vtkPiecewiseFunction> opacityTransferFunction;
-    opacityTransferFunction->AddPoint(0, 0.8);
-    opacityTransferFunction->AddPoint(3608, 0.8);
+    opacityTransferFunction->AddPoint(-1100, 0.8);
+    opacityTransferFunction->AddPoint(1100, 0.8);
 
     vtkNew<vtkVolumeProperty> volumeProperty;
     volumeProperty->ShadeOff();

@@ -19,8 +19,11 @@ Contour::Contour()
     vtkNew<vtkContourFilter> contourFilter;
     contourFilter->SetInputConnection(assignAttribute->GetOutputPort());
     contourFilter->SetInputArrayToProcess(0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, property.c_str());
-    contourFilter->GenerateValues(10, -1100, 1100);
+//    contourFilter->GenerateValues(10, -1100, 1100);
 
+    contourFilter->SetValue(0, -150);
+    contourFilter->SetValue(1, 0);
+    contourFilter->SetValue(2, 200);
     vtkNew<vtkPolyDataMapper> polyMapper;
 
     vtkSmartPointer<vtkPlane> plane = vtkSmartPointer<vtkPlane>::New();
