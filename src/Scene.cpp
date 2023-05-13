@@ -39,10 +39,10 @@ void Scene::ProcessInput(char* input)
 void Scene::SwitchPipeline(int index)
 {
     //remove old pipeline
-    for (int i = 0; i < 4; i++) {
-        if (pipelines[i] != nullptr) {
+    for (const auto & pipeline : pipelines) {
+        if (pipeline != nullptr) {
             std::cout << "Remove pipeline from Scene." << std::endl;
-            pipelines[i]->RemoveFromScene(this->renderer);
+            pipeline->RemoveFromScene(this->renderer);
         }
     }
     if (pipelines[index] == nullptr) {
@@ -57,7 +57,7 @@ void Scene::SwitchPipeline(int index)
                 pipelines[2] = std::move(std::make_unique<Volumes>());
                 break;
             case 3:
-                pipelines[3] = std::move(std::make_unique<Contour>());
+                pipelines[3] = std::make_unique<Contour>();
                 break;
             default:
                 std::cout << "Invalid pipeline index." << std::endl;
