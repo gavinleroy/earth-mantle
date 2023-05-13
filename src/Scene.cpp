@@ -39,7 +39,7 @@ void Scene::ProcessInput(char* input)
 void Scene::SwitchPipeline(int index)
 {
     //remove old pipeline
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 4; i++) {
         if (pipelines[i] != nullptr) {
             std::cout << "Remove pipeline from Scene." << std::endl;
             pipelines[i]->RemoveFromScene(this->renderer);
