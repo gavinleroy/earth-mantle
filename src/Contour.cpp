@@ -27,9 +27,16 @@ Contour::Contour()
     plane->SetOrigin(0., 0., 0.);
     plane->SetNormal(0., 1.0, 0);
 
+    vtkNew<vtkLookupTable> lut;
+    lut->SetVectorMode(vtkScalarsToColors::MAGNITUDE);
+    lut->SetHueRange(.6, 1.);
+    lut->SetValueRange(1, 1);
+    lut->SetSaturationRange(.8, .8);
+
     polyMapper->SetInputConnection(contourFilter->GetOutputPort());
     polyMapper->SelectColorArray(property.c_str());
     polyMapper->AddClippingPlane(plane);
+    polyMapper->SetLookupTable(lut);
 
     mContour->SetMapper(polyMapper);
     mContour->GetProperty()->SetLineWidth(5);
