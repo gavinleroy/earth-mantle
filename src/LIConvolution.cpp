@@ -3,6 +3,7 @@
 LIConvolution::LIConvolution()
     : Mantle()
     , mActor(vtkSmartPointer<vtkActor>::New())
+    , mClippingPlane(vtkSmartPointer<vtkPlane>::New())
 {
     auto fromFile = GetCurrentStream();
 
@@ -20,8 +21,12 @@ LIConvolution::LIConvolution()
     calculator->SetFunction("(iHat * vx + jHat * vy + kHat * vz) * 1e9");
 
     // Extract the geometry
-    vtkNew<vtkGeometryFilter> geometry;
+    int extent[6] = {0, 0, 0, 0, 0, 0};
+    calculator->GetStructuredGridOutput()->GetExtent(extent);
+    for (int i : extent) std::cout << i << " "; std::cout << std::endl;
+    vtkNew<vtkStructuredGridGeometryFilter> geometry;
     geometry->SetInputConnection(calculator->GetOutputPort());
+    // geometry->SetExtent() ???
 
     // Line integral convolution (LIC) mapper
     vtkNew<vtkSurfaceLICMapper> licMapper;
@@ -48,11 +53,10 @@ LIConvolution::LIConvolution()
     licMapper->SetLookupTable(colorTransferFunction);
 
     // Slice the geometry
-    vtkNew<vtkPlane> clippingPlane;
-    clippingPlane->SetOrigin(0., 0., 0);
-    clippingPlane->SetNormal(0., 1.0, 0);
+    mClippingPlane->SetOrigin(0., 0., 0);
+    mClippingPlane->SetNormal(0., 1.0, 0);
 
-    licMapper->AddClippingPlane(clippingPlane);
+    licMapper->AddClippingPlane(mClippingPlane);
     this->mActor->SetMapper(licMapper);
 }
 
@@ -67,3 +71,9 @@ void LIConvolution::RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer)
 }
 
 void LIConvolution::Update() { }
+
+void LIConvolution::Update(double dt, double t)
+{
+    mClippingPlane->SetNormal(cos(t), sin(t), 0);
+    std::cout << "Updated: " << cos(t) << ", " << sin(t) << std::endl;
+}

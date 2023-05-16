@@ -67,7 +67,7 @@ private:
 public:
     Tube();
     ~Tube() { }
-    void Update();
+    void Update(double dt, double t);
     void ConnectToScene(vtkSmartPointer<vtkRenderer> renderer);
     void RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer);
 };

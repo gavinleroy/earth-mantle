@@ -85,7 +85,7 @@ Tube::Tube()
 }
 
 
-void Tube::Update() { }
+void Tube::Update(double dt, double t) { }
 
 
 void Tube::ConnectToScene(vtkSmartPointer<vtkRenderer> renderer)

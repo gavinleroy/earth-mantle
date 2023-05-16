@@ -76,4 +76,4 @@ void Volumes::RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer)
     renderer->RemoveVolume(mVolume);
 }
 
-void Volumes::Update() { }
+void Volumes::Update(double dt, double t) { }

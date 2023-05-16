@@ -67,4 +67,8 @@ void Scene::SwitchPipeline(int index)
 void Scene::Update(double dt, double t)
 {
     /* TODO */
+    std::cout << "Big update: " << std::endl;
+    if (pipelines[0] != nullptr) {
+        pipelines[0]->Update(dt, t);
+    }
 }

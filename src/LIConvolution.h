@@ -17,12 +17,14 @@ private:
     void operator=(const LIConvolution &) = delete;  // Delete the assignment operator.
 
     vtkSmartPointer<vtkActor> mActor;
+    vtkSmartPointer<vtkPlane> mClippingPlane;
 
 public:
     LIConvolution();
     ~LIConvolution() { }
 
     void Update();
+    void Update(double dt, double t);
     void ConnectToScene(vtkSmartPointer<vtkRenderer> renderer);
     void RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer);
 };
