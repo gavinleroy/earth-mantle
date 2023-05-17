@@ -6,8 +6,8 @@ Volumes::Volumes()
     : Resample::Resample()
     , mVolume(vtkSmartPointer<vtkVolume>::New())
 {
-    MantleIO::MantleAttr property = MantleIO::MantleAttr::TempAnom;
-    auto resampler = Resample::GetResampled();
+    MantleIO::MantleAttr property  = MantleIO::MantleAttr::TempAnom;
+    auto                 resampler = Resample::GetResampled();
 
     vtkNew<vtkAssignAttribute> assignAttribute;
     assignAttribute->SetInputConnection(resampler->GetOutputPort());
@@ -75,5 +75,3 @@ void Volumes::RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer)
 {
     renderer->RemoveVolume(mVolume);
 }
-
-void Volumes::Update() { }

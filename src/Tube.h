@@ -59,7 +59,7 @@
 
 class Tube : private MantleIO::Mantle, public Pipe::Pipeline {
 private:
-    Tube(const Tube &) = delete;            // Delete the copy-constructor.
+    Tube(const Tube &)           = delete;  // Delete the copy-constructor.
     void operator=(const Tube &) = delete;  // Delete the assignment operator.
 
     vtkSmartPointer<vtkActor> streamlineActor;
@@ -67,7 +67,6 @@ private:
 public:
     Tube();
     ~Tube() { }
-    void Update();
     void ConnectToScene(vtkSmartPointer<vtkRenderer> renderer);
     void RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer);
 };

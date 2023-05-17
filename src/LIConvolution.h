@@ -13,7 +13,7 @@
 
 class LIConvolution : private MantleIO::Mantle, public Pipe::Pipeline {
 private:
-    LIConvolution(const LIConvolution &) = delete;   // Delete the copy-constructor.
+    LIConvolution(const LIConvolution &)  = delete;  // Delete the copy-constructor.
     void operator=(const LIConvolution &) = delete;  // Delete the assignment operator.
 
     vtkSmartPointer<vtkActor> mActor;
@@ -22,7 +22,6 @@ public:
     LIConvolution();
     ~LIConvolution() { }
 
-    void Update();
     void ConnectToScene(vtkSmartPointer<vtkRenderer> renderer);
     void RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer);
 };

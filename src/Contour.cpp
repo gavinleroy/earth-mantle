@@ -2,14 +2,14 @@
 #include "Contour.h"
 
 Contour::Contour()
-        : Resample::Resample()
+    : Resample::Resample()
 {
     if (mContour != nullptr) {
         return;
     }
-    mContour = vtkSmartPointer<vtkActor>::New();
-    MantleIO::MantleAttr property = MantleIO::MantleAttr::TempAnom;
-    auto resampler = Resample::GetResampled();
+    mContour                       = vtkSmartPointer<vtkActor>::New();
+    MantleIO::MantleAttr property  = MantleIO::MantleAttr::TempAnom;
+    auto                 resampler = Resample::GetResampled();
 
     vtkNew<vtkAssignAttribute> assignAttribute;
     assignAttribute->SetInputConnection(resampler->GetOutputPort());
@@ -18,8 +18,9 @@ Contour::Contour()
 
     vtkNew<vtkContourFilter> contourFilter;
     contourFilter->SetInputConnection(assignAttribute->GetOutputPort());
-    contourFilter->SetInputArrayToProcess(0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, property.c_str());
-//    contourFilter->GenerateValues(10, -1100, 1100);
+    contourFilter->SetInputArrayToProcess(
+        0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, property.c_str());
+    //    contourFilter->GenerateValues(10, -1100, 1100);
 
     contourFilter->SetValue(0, -150);
     contourFilter->SetValue(1, 0);
@@ -55,6 +56,3 @@ void Contour::RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer)
 {
     renderer->RemoveActor(mContour);
 }
-
-void Contour::Update() { }
-

@@ -35,12 +35,14 @@ Tube::Tube()
     seeds->SetRadius(6000);
     seeds->SetNumberOfPoints(1000);
 
-//    Seed based on filtered points TempAnomaly
-    MantleIO::MantleAttr anom = MantleIO::MantleAttr::TempAnom;
-    vtkSmartPointer<vtkThresholdPoints> thresholdFilter = vtkSmartPointer<vtkThresholdPoints>::New();
+    //    Seed based on filtered points TempAnomaly
+    MantleIO::MantleAttr                anom = MantleIO::MantleAttr::TempAnom;
+    vtkSmartPointer<vtkThresholdPoints> thresholdFilter
+        = vtkSmartPointer<vtkThresholdPoints>::New();
     thresholdFilter->SetInputConnection(cellToPoint->GetOutputPort());
     thresholdFilter->ThresholdBetween(900, 1100);
-    thresholdFilter->SetInputArrayToProcess(0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, anom.c_str());
+    thresholdFilter->SetInputArrayToProcess(
+        0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, anom.c_str());
     vtkSmartPointer<vtkMaskPoints> sampler = vtkSmartPointer<vtkMaskPoints>::New();
     sampler->SetInputConnection(thresholdFilter->GetOutputPort());
     sampler->SetOnRatio(1);
@@ -52,9 +54,9 @@ Tube::Tube()
 
     vtkNew<vtkStreamTracer> tracer;
     tracer->SetInputConnection(assignAttribute->GetOutputPort());
-//    tracer->SetSourceConnection(line->GetOutputPort());
+    //    tracer->SetSourceConnection(line->GetOutputPort());
     tracer->SetSourceConnection(seeds->GetOutputPort());
-//    tracer->SetSourceConnection(sampler->GetOutputPort());
+    //    tracer->SetSourceConnection(sampler->GetOutputPort());
 
     tracer->SetInterpolatorType(vtkStreamTracer::INTERPOLATOR_WITH_DATASET_POINT_LOCATOR);
     tracer->SetIntegrationDirection(vtkStreamTracer::BOTH);
@@ -83,10 +85,6 @@ Tube::Tube()
     streamlineActor->SetMapper(streamlineMapper);
     streamlineActor->VisibilityOn();
 }
-
-
-void Tube::Update() { }
-
 
 void Tube::ConnectToScene(vtkSmartPointer<vtkRenderer> renderer)
 {

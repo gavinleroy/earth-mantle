@@ -30,7 +30,7 @@ LIConvolution::LIConvolution()
     // Disable enhanced LIC (for now)
     licMapper->GetLICInterface()->SetEnhancedLIC(1);
 
-    double range[] = { -1100., 1100. };
+    double                 range[] = { -1100., 1100. };
     vtkNew<vtkLookupTable> lookupTable;
     lookupTable->SetHueRange(0.75, 0.);
     lookupTable->SetValueRange(1., 1.);
@@ -48,7 +48,7 @@ LIConvolution::LIConvolution()
     clippingPlane->SetOrigin(0., 0., 0);
     clippingPlane->SetNormal(0., 1.0, 0);
 
-//    licMapper->AddClippingPlane(clippingPlane);
+    //    licMapper->AddClippingPlane(clippingPlane);
     this->mActor->SetMapper(licMapper);
 }
 
@@ -61,5 +61,3 @@ void LIConvolution::RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer)
 {
     renderer->RemoveActor(mActor);
 }
-
-void LIConvolution::Update() { }

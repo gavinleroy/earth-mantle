@@ -2,14 +2,14 @@
 #include "IsoVolume.h"
 
 IsoVolume::IsoVolume()
-: Resample::Resample()
+    : Resample::Resample()
 {
     if (mVolume != nullptr) {
         return;
     }
     mVolume = vtkSmartPointer<vtkVolume>::New();
 
-    double range[] = { -1100., 1100. };
+    double                           range[] = { -1100., 1100. };
     vtkNew<vtkColorTransferFunction> colorTransferFunction;
     colorTransferFunction->SetNanOpacity(1.0);
     colorTransferFunction->SetColorSpaceToRGB();
@@ -29,8 +29,8 @@ IsoVolume::IsoVolume()
     opacityTransferFunction->AddPoint(151, 1.);
     opacityTransferFunction->AddPoint(1100, 1.);
 
-    MantleIO::MantleAttr property = MantleIO::MantleAttr::TempAnom;
-    auto resampler = Resample::GetResampled();
+    MantleIO::MantleAttr property  = MantleIO::MantleAttr::TempAnom;
+    auto                 resampler = Resample::GetResampled();
 
     vtkNew<vtkAssignAttribute> assignAttribute;
     assignAttribute->SetInputConnection(resampler->GetOutputPort());
@@ -44,10 +44,10 @@ IsoVolume::IsoVolume()
     volumeRayMapper->SetAutoAdjustSampleDistances(true);
     volumeRayMapper->SetUseJittering(true);
 
-//    vtkSmartPointer<vtkPlane> plane = vtkSmartPointer<vtkPlane>::New();
-//    plane->SetOrigin(0., 0., 0.);
-//    plane->SetNormal(0., 1.0, 0);
-//    volumeRayMapper->AddClippingPlane(plane);
+    //    vtkSmartPointer<vtkPlane> plane = vtkSmartPointer<vtkPlane>::New();
+    //    plane->SetOrigin(0., 0., 0.);
+    //    plane->SetNormal(0., 1.0, 0);
+    //    volumeRayMapper->AddClippingPlane(plane);
 
     vtkNew<vtkVolumeProperty> volumeProperty;
     volumeProperty->SetInterpolationTypeToLinear();
@@ -72,5 +72,3 @@ void IsoVolume::RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer)
 {
     renderer->RemoveVolume(mVolume);
 }
-
-void IsoVolume::Update() { }
