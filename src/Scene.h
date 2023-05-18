@@ -21,19 +21,26 @@ class Scene {
 private:
     Scene(const Scene &) = delete;           // Delete the copy-constructor.
     void operator=(const Scene &) = delete;  // Delete the assignment operator.
-    /* Pipeline pointers:
-        * 0: LIConvolution
-        * 1: Tube
-        * 2: Volumes
-    */
-    std::unique_ptr<Pipe::Pipeline> pipelines[5];
     vtkSmartPointer<vtkRenderer> renderer;
 
+    enum pipelineType
+    {
+        volumes,
+        tube,
+        liconvolution,
+        contour,
+        isovolume,
+    };
+    std::vector<pipelineType> pipeTypes;
+    std::vector<std::unique_ptr<Pipe::Pipeline>> pipelines;
+    
+    std::unique_ptr<Pipe::Pipeline> NewPipeline(pipelineType pipeType);
+    void ConnectPipeline(pipelineType pipeType);
+    
 public:
     Scene();
     void InitRenderer(vtkSmartPointer<vtkRenderer> renderer);
     void InitUI(vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor);
-    void ProcessInput(char* input);
-    void SwitchPipeline(int index);
+    void ProcessInput(std::string input);
     void Update(double dt, double t);
 };

@@ -20,59 +20,65 @@ void Scene::InitUI(vtkSmartPointer<vtkRenderWindowInteractor> renderWindowIntera
     std::cout << "v: switch to Volumes pipeline" << std::endl;
     std::cout << "c: switch to Contour pipeline" << std::endl;
     std::cout << "i: switch to IsoVolumes pipeline" << std::endl;
-    //std::cout << "w: toggle wireframe" << std::endl;
-    //std::cout << "s: step forward" << std::endl;
-    //std::cout << "b: step backward" << std::endl;
 }
 
-void Scene::ProcessInput(char* input)
+void Scene::ProcessInput(std::string input)
 {
-    // TODO: only render one pipeline at a time
-    std::cout << "Input: " << input << std::endl;
-    if (strcmp(input, "l") == 0) SwitchPipeline(0);
-    if (strcmp(input, "t") == 0) SwitchPipeline(1);
-    if (strcmp(input, "v") == 0) SwitchPipeline(2);
-    if (strcmp(input, "c") == 0) SwitchPipeline(3);
-    if (strcmp(input, "i") == 0) SwitchPipeline(4);
+    if (input.compare("l") == 0) ConnectPipeline(liconvolution);
+    if (input.compare("t") == 0) ConnectPipeline(tube);
+    if (input.compare("v") == 0) ConnectPipeline(volumes);
+    if (input.compare("c") == 0) ConnectPipeline(contour);
+    if (input.compare("i") == 0) ConnectPipeline(isovolume);
 
     // add more controls here if needed ...
 }
 
-void Scene::SwitchPipeline(int index)
+std::unique_ptr<Pipe::Pipeline> Scene::NewPipeline(pipelineType pipeType) 
 {
-    //remove old pipeline
+    switch(pipeType) {
+        case volumes:
+            return std::make_unique<Volumes>(); 
+        case tube:
+            return std::make_unique<Tube>();
+        case liconvolution:
+            return std::make_unique<LIConvolution>();
+        case contour:
+            return std::make_unique<Contour>();
+        case isovolume:
+            return std::make_unique<IsoVolume>();
+        default:
+            std::cout << "Invalid pipeline type." << std::endl;
+            return nullptr;
+    }
+}
+
+void Scene::ConnectPipeline(pipelineType pipeType)
+{
+    // Disconnect all pipelines
     for (const auto & pipeline : pipelines) {
         if (pipeline != nullptr) {
-            std::cout << "Remove pipeline from Scene." << std::endl;
             pipeline->RemoveFromScene(this->renderer);
         }
     }
-    if (pipelines[index] == nullptr) {
-        switch(index) {
-            case 0:
-                pipelines[0] = std::make_unique<LIConvolution>();
-                break;
-            case 1:
-                pipelines[1] = std::make_unique<Tube>();
-                break;
-            case 2:
-                pipelines[2] = std::move(std::make_unique<Volumes>());
-                break;
-            case 3:
-                pipelines[3] = std::make_unique<Contour>();
-                break;
-            case 4:
-                pipelines[4] = std::make_unique<IsoVolume>();
-                break;
-            default:
-                std::cout << "Invalid pipeline index." << std::endl;
-                return;
-        }
-    }
-    std::cout << "Connect pipeline to Scene." << std::endl;
-    pipelines[index]->ConnectToScene(this->renderer);
-}
 
+    // Find the selected pipeline
+    auto it = std::find(pipeTypes.begin(), pipeTypes.end(), pipeType);
+    int idx = it - pipeTypes.begin();
+
+    // If the selected pipeline is not found, create a new one
+    if (it == pipeTypes.end()) {
+        pipelines.push_back(NewPipeline(pipeType));
+        pipeTypes.push_back(pipeType);
+        idx = pipelines.size() - 1;
+    }
+
+    // Connect the selected pipeline
+    pipelines[idx]->ConnectToScene(this->renderer);
+
+    std::string pipeTypeStr = typeid(*pipelines[idx]).name();
+    pipeTypeStr = pipeTypeStr.erase(0, pipeTypeStr.find_first_not_of("0123456789"));
+    std::cout << pipeTypeStr << " pipeline connected." << std::endl;
+}
 
 void Scene::Update(double dt, double t)
 {
