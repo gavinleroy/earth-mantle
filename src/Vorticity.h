@@ -1,5 +1,9 @@
 #pragma once
 
+#include <vtkGradientFilter.h>
+#include <vtkGeometryfilter.h>
+#include <vtkPolyDataMapper.h>
+
 #include "Mantle.h"
 #include "Pipeline.h"
 
