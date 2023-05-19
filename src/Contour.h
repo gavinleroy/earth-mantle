@@ -7,6 +7,8 @@
 #include <vtkActor.h>
 #include <vtkContourFilter.h>
 #include <vtkPolyDataMapper.h>
+#include <vtkInformation.h>
+#include <vtkImageReslice.h>
 
 class Contour : public Pipe::Pipeline, private Resample::Resample {
 private:

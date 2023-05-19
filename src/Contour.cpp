@@ -16,8 +16,16 @@ Contour::Contour()
     assignAttribute->Assign(property.c_str(), vtkDataSetAttributes::SCALARS,
                             vtkAssignAttribute::POINT_DATA);
 
+    assignAttribute->GetOutputDataObject(0)->SetActiveAttribute(
+            assignAttribute->GetInformation(), vtkDataObject::FIELD_ASSOCIATION_POINTS, property.c_str(),
+            vtkDataSetAttributes::SCALARS);
+
+    vtkNew<vtkImageReslice> imageReslice;
+    imageReslice->SetInputConnection(assignAttribute->GetOutputPort());
+    imageReslice->SetInterpolationModeToCubic();
+
     vtkNew<vtkContourFilter> contourFilter;
-    contourFilter->SetInputConnection(assignAttribute->GetOutputPort());
+    contourFilter->SetInputConnection(imageReslice->GetOutputPort());
     contourFilter->SetInputArrayToProcess(
         0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, property.c_str());
     //    contourFilter->GenerateValues(10, -1100, 1100);
