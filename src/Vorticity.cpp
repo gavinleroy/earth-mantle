@@ -34,16 +34,23 @@ Vorticity::Vorticity()
     vorticityCalculator->SetInputConnection(gradient->GetOutputPort());
     vorticityCalculator->SetResultArrayName("vorticity magnitude");
     vorticityCalculator->AddVectorVariable("vorticity", "vorticity");
-    vorticityCalculator->SetFunction("vorticity . iHat + vorticity . jHat + vorticity. kHat");
+    vorticityCalculator->SetFunction("sqrt(dot(vorticity, vorticity))");
 
-    vtkNew<vtkGeometryFilter> geometry;
-    geometry->SetInputConnection(gradient->GetOutputPort());
+    // According to VTK, the range of vorticity magnitude is: [0, 0.539739]
+
+    vtkNew<vtkAssignAttribute> assignAttribute;
+    assignAttribute->SetInputConnection(vorticityCalculator->GetOutputPort());
+    assignAttribute->Assign("vorticity magnitude", vtkDataSetAttributes::SCALARS,
+                            vtkAssignAttribute::POINT_DATA);
+
+    vtkNew<vtkContourFilter> contourFilter;
+    contourFilter->SetInputConnection(assignAttribute->GetOutputPort());
+    contourFilter->SetInputArrayToProcess(
+            0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, "vorticity magnitude");
+    contourFilter->SetValue(0, .03);
 
     vtkNew<vtkPolyDataMapper> polyDataMapper;
-    polyDataMapper->SetInputConnection(geometry->GetOutputPort());
-    polyDataMapper->SetScalarVisibility(true);
-    polyDataMapper->SetArrayName("vorticity magnitude");
-    polyDataMapper->SetScalarModeToUsePointData();
+    polyDataMapper->SetInputConnection(contourFilter->GetOutputPort());
 
     vtkNew<vtkPlane> clippingPlane;
     clippingPlane->SetOrigin(0.0, 0.0, 0.0);

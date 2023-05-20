@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vtkGradientFilter.h>
-#include <vtkGeometryfilter.h>
+#include <vtkContourFilter.h>
 #include <vtkPolyDataMapper.h>
 
 #include "Mantle.h"
