@@ -44,18 +44,18 @@ void LIConvolution::ConstructInternal()
     mapper->SetLookupTable(lookupTable);
 }
 
+void LIConvolution::SetInputConnection(std::shared_ptr<Pipe::AllInput> pipelines)
+{
+#ifndef NDEBUG
+    std::cout << "LIC: Setting input connection" << std::endl;
+#endif
+    this->geometry->SetInputConnection(pipelines->velocityCalculator->GetOutputPort());
+}
+
 void LIConvolution::ConnectToActor(vtkSmartPointer<vtkActor> actor)
 {
 #ifndef NDEBUG
     std::cout << "LIC: Connecting to new actor" << std::endl;
 #endif
     actor->SetMapper(mapper);
-}
-
-void LIConvolution::SetInputConnection(vtkAlgorithmOutput *cin)
-{
-#ifndef NDEBUG
-    std::cout << "LIC: Setting input connection" << std::endl;
-#endif
-    this->geometry->SetInputConnection(cin);
 }

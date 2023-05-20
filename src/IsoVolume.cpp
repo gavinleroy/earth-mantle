@@ -49,9 +49,10 @@ IsoVolume::IsoVolume()
     mVolume->SetProperty(volumeProperty);
 }
 
-void IsoVolume::SetInputConnection(vtkAlgorithmOutput *cin)
+void IsoVolume::SetInputConnection(std::shared_ptr<Pipe::AllInput> pipelines)
 {
-    this->input->SetInputConnection(cin);
+    throw "NYI";
+    // this->input->SetInputConnection(cin);
 }
 
 void IsoVolume::ConnectToScene(vtkSmartPointer<vtkRenderer> renderer)

@@ -1,6 +1,4 @@
 #include "Volumes.h"
-#include <vtkAssignAttribute.h>
-#include <vtkDataSetAttributes.h>
 
 Volumes::Volumes()
 {
@@ -64,9 +62,10 @@ Volumes::Volumes()
     // this->mVolume->SetPosition(14000, 0, 14000);
 }
 
-void Volumes::SetInputConnection(vtkAlgorithmOutput *cin)
+void Volumes::SetInputConnection(std::shared_ptr<Pipe::AllInput> pipelines)
 {
-    this->assignAttribute->SetInputConnection(cin);
+    throw "NYI";
+    // this->assignAttribute->SetInputConnection(cin);
 }
 
 void Volumes::ConnectToScene(vtkSmartPointer<vtkRenderer> renderer)

@@ -7,6 +7,12 @@ Contour::Contour()
 
     MantleIO::MantleAttr property = MantleIO::MantleAttr::TempAnom;
 
+    vtkNew<vtkLookupTable> lut;
+    lut->SetVectorMode(vtkScalarsToColors::MAGNITUDE);
+    lut->SetHueRange(.6, 1.);
+    lut->SetValueRange(1, 1);
+    lut->SetSaturationRange(.8, .8);
+
     contourFilter->SetInputArrayToProcess(
         0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, property.c_str());
     //    contourFilter->GenerateValues(10, -1100, 1100);
@@ -15,12 +21,6 @@ Contour::Contour()
     contourFilter->SetValue(1, 0);
     contourFilter->SetValue(2, 200);
 
-    vtkNew<vtkLookupTable> lut;
-    lut->SetVectorMode(vtkScalarsToColors::MAGNITUDE);
-    lut->SetHueRange(.6, 1.);
-    lut->SetValueRange(1, 1);
-    lut->SetSaturationRange(.8, .8);
-
     // Save the mapper internally so we can attach to the scene later.
     this->mapper->SetInputConnection(contourFilter->GetOutputPort());
     this->mapper->SelectColorArray(property.c_str());
@@ -28,10 +28,11 @@ Contour::Contour()
 }
 
 
-void Contour::SetInputConnection(vtkAlgorithmOutput *cin)
+void Contour::SetInputConnection(std::shared_ptr<Pipe::AllInput> pipelines)
 {
+    throw "NYI";
     // NOTE: expects property assigned attributes.
-    contourFilter->SetInputConnection(cin);
+    // contourFilter->SetInputConnection(cin);
 }
 
 void Contour::ConnectToActor(vtkSmartPointer<vtkActor> actor)

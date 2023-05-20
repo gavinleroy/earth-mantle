@@ -7,31 +7,17 @@ Scene::Scene()
 #ifndef NDEBUG
     std::cout << "SCENE: Initializing new scene" << std::endl;
 #endif
-    geometry = std::make_unique<Geometry::Geometry>();
-
-    reader             = std::make_shared<MantleIO::Mantle>();
-    resampled          = std::make_shared<Pipe::Resample>();
-    velocityCalculator = std::make_shared<Pipe::VelocityCalculator>();
-    assignAttr         = std::make_shared<Pipe::TempAnomAttribute>();
-
-    // Initialize default pipeline starts
-
-    // mantle -> resampled
-    resampled->SetInputConnection(reader->GetOutputPort());
-
-    // mantle -> resampled -> attribute assigned
-    assignAttr->SetInputConnection(resampled->GetOutputPort());
-
-    // mantle -> resampled -> velocity
-    velocityCalculator->SetInputConnection(resampled->GetOutputPort());
+    geometry       = std::make_unique<Geometry::Geometry>();
+    inputPipelines = std::make_shared<Pipe::AllInput>();
 
     // Initialize earth mappings
     currentEarthMapper = EarthView::LIC;
     earthMappers       = EarthMappings({
-        { EarthView::LIC,
-                { .mapper = std::make_shared<LIConvolution>(  // velocityCalculator->GetOutputPort()
+        {
+            EarthView::LIC,
+            std::make_shared<LIConvolution>(  // velocityCalculator->GetOutputPort()
                 ),
-                  .input = velocityCalculator } }
+        }
         // TODO: add the rest of the mappings
     });
 
@@ -66,14 +52,14 @@ void Scene::SetMapping(EarthView idx)
 #ifndef NDEBUG
     std::cout << "SCENE: Setting mapping" << std::endl;
 #endif
-    auto data = this->earthMappers[idx];
-    data.mapper->SetInputConnection(data.input->GetOutputPort());
+    auto mapper = this->earthMappers[idx];
+    mapper->SetInputConnection(this->inputPipelines);
 
     vtkNew<vtkActor> act;
-    data.mapper->ConnectToActor(act);
+    mapper->ConnectToActor(act);
     renderer->AddActor(act);
 
-    // this->geometry->SetActiveMapper(data.mapper);
+    this->geometry->SetActiveMapper(mapper);
 }
 
 void Scene::InitUI(vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor)

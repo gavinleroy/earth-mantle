@@ -17,7 +17,6 @@
 #include "Contour.h"
 #include "IsoVolume.h"
 #include "Geometry.h"
-#include "Utils.h"
 
 // TODO: add everything else
 enum class EarthView {
@@ -30,13 +29,8 @@ enum class VolumeView {
     // ...
 };
 
-template <typename T> struct Mapping {
-    std::shared_ptr<Pipe::OutputPipeline> input;
-    std::shared_ptr<T>                    mapper;
-};
-
-using EarthMappings  = std::unordered_map<EarthView, Mapping<Pipe::ActorMapped>>;
-using VolumeMappings = std::unordered_map<VolumeView, Mapping<Pipe::VolumeMapped>>;
+using EarthMappings = std::unordered_map<EarthView, std::shared_ptr<Pipe::ActorMapped>>;
+using VolumeMappings = std::unordered_map<VolumeView, std::shared_ptr<Pipe::VolumeMapped>>;
 
 class Scene {
 private:
@@ -47,13 +41,7 @@ private:
     std::optional<EarthView>  currentEarthMapper;
     std::optional<VolumeView> currentEarthVolume;
 
-    // Input data sources, and common transformations.
-    std::shared_ptr<MantleIO::Mantle>         reader;
-    std::shared_ptr<Pipe::Resample>           resampled;
-    std::shared_ptr<Pipe::VelocityCalculator> velocityCalculator;
-    std::shared_ptr<Pipe::TempAnomAttribute>  assignAttr;
-
-
+    std::shared_ptr<Pipe::AllInput>     inputPipelines;
     std::unique_ptr<Geometry::Geometry> geometry;
 
     EarthMappings                earthMappers;

@@ -39,6 +39,7 @@ Tube::Tube()
     thresholdFilter->ThresholdBetween(900, 1100);
     thresholdFilter->SetInputArrayToProcess(
         0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, anom.c_str());
+
     vtkSmartPointer<vtkMaskPoints> sampler = vtkSmartPointer<vtkMaskPoints>::New();
     sampler->SetInputConnection(thresholdFilter->GetOutputPort());
     sampler->SetOnRatio(1);
@@ -82,9 +83,10 @@ Tube::Tube()
     streamlineActor->VisibilityOn();
 }
 
-void Tube::SetInputConnection(vtkAlgorithmOutput *cin)
+void Tube::SetInputConnection(std::shared_ptr<Pipe::AllInput> pipelines)
 {
-    this->cellToPoint->SetInputConnection(cin);
+    throw "NYI";
+    // this->cellToPoint->SetInputConnection(cin);
 }
 
 void Tube::ConnectToScene(vtkSmartPointer<vtkRenderer> renderer)

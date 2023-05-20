@@ -6,7 +6,6 @@
 #include <vtkContourFilter.h>
 #include <vtkPolyDataMapper.h>
 
-#include "Mantle.h"
 #include "Pipeline.h"
 
 class Contour : public Pipe::ActorMapped {
@@ -20,6 +19,6 @@ private:
 public:
     Contour();
 
-    void SetInputConnection(vtkAlgorithmOutput *input);
+    void SetInputConnection(std::shared_ptr<Pipe::AllInput> pipelines);
     void ConnectToActor(vtkSmartPointer<vtkActor> actor);
 };

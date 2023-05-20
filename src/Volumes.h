@@ -46,7 +46,9 @@
 // #include <vtkThreshold.h>
 // #include <vtkUnstructuredGrid.h>
 
-#include "Mantle.h"
+#include <vtkAssignAttribute.h>
+#include <vtkDataSetAttributes.h>
+
 #include "Pipeline.h"
 
 class Volumes : public Pipe::VolumeMapped {
@@ -61,7 +63,7 @@ public:
     Volumes();
     ~Volumes() { }
 
-    void SetInputConnection(vtkAlgorithmOutput *cin);
+    void SetInputConnection(std::shared_ptr<Pipe::AllInput> pipelines);
     void ConnectToScene(vtkSmartPointer<vtkRenderer> renderer);
     void RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer);
 };

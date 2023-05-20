@@ -8,7 +8,6 @@
 #include "vtkSurfaceLICMapper.h"
 #include "vtkSurfaceLICInterface.h"
 
-#include "Mantle.h"
 #include "Pipeline.h"
 
 class LIConvolution : public Pipe::ActorMapped {
@@ -26,6 +25,6 @@ public:
     LIConvolution(vtkAlgorithmOutput *input);
     ~LIConvolution() { }
 
+    void SetInputConnection(std::shared_ptr<Pipe::AllInput> pipelines);
     void ConnectToActor(vtkSmartPointer<vtkActor> actor);
-    void SetInputConnection(vtkAlgorithmOutput *input);
 };

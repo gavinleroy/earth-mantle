@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Mantle.h"
-
 #include <vtkPolyDataMapper.h>
 #include <vtkActor.h>
 #include <vtkProperty.h>
@@ -54,7 +52,6 @@
 #include <vtkThreshold.h>
 #include <vtkMaskPoints.h>
 
-#include "Mantle.h"
 #include "Pipeline.h"
 
 class Tube : public Pipe::VolumeMapped {
@@ -69,7 +66,7 @@ public:
     Tube();
     ~Tube() { }
 
-    void SetInputConnection(vtkAlgorithmOutput *cin);
+    void SetInputConnection(std::shared_ptr<Pipe::AllInput> pipelines);
     void ConnectToScene(vtkSmartPointer<vtkRenderer> renderer);
     void RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer);
 };
