@@ -2,20 +2,16 @@
 
 Volumes::Volumes()
 {
-    this->mVolume         = vtkSmartPointer<vtkVolume>::New();
-    this->assignAttribute = vtkSmartPointer<vtkAssignAttribute>::New();
+    mVolume         = vtkSmartPointer<vtkVolume>::New();
+    volumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
+    ConstructInternal();
+}
 
-    MantleIO::MantleAttr property = MantleIO::MantleAttr::TempAnom;
-
-    assignAttribute->Assign(property.c_str(), vtkDataSetAttributes::SCALARS,
-                            vtkAssignAttribute::POINT_DATA);
-
-#ifndef NDEBUG
-    assignAttribute->GetOutput()->Print(std::cout);
-#endif
-
+void Volumes::ConstructInternal()
+{
     double range[] = { -1100., 1100. };
 
+    MantleIO::MantleAttr property  = MantleIO::MantleAttr::TempAnom;
     // Create a color transfer function
     vtkNew<vtkColorTransferFunction> colorTransferFunction;
     colorTransferFunction->SetNanOpacity(1.0);
@@ -45,8 +41,7 @@ Volumes::Volumes()
 
 
     // Add a mapper to create graphic primitives from the data
-    vtkNew<vtkSmartVolumeMapper> volumeMapper;
-    volumeMapper->SetInputConnection(assignAttribute->GetOutputPort());
+//    vtkNew<vtkSmartVolumeMapper> volumeMapper;
 #ifndef NDEBUG
     std::cout << "Loading scalar array: " << property.c_str() << " for volume render"
               << std::endl;
@@ -58,13 +53,11 @@ Volumes::Volumes()
 
     this->mVolume->SetMapper(volumeMapper);
     this->mVolume->SetProperty(volumeProperty);
-    // TODO adjust this offset so the scene looks nice
-    // this->mVolume->SetPosition(14000, 0, 14000);
 }
 
 void Volumes::SetInputConnection(std::shared_ptr<Pipe::AllInput> pipelines)
 {
-    throw "NYI";
+    volumeMapper->SetInputConnection(pipelines->assignAttr->GetOutputPort());
     // this->assignAttribute->SetInputConnection(cin);
 }
 

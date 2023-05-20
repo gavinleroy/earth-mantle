@@ -64,8 +64,8 @@ void Scene::SetMapping(EarthView idx)
 
 void Scene::InitUI(vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor)
 {
-    // print avilable input options
-    std::cout << "Available input options:" << std::endl;
+    // print avilable assignAttribute options
+    std::cout << "Available assignAttribute options:" << std::endl;
     // std::cout << "l: switch to LIConvolution pipeline" << std::endl;
     // std::cout << "t: switch to Tube pipeline" << std::endl;
     // std::cout << "v: switch to Volumes pipeline" << std::endl;

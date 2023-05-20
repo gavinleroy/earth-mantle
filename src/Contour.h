@@ -16,6 +16,8 @@ private:
     vtkSmartPointer<vtkContourFilter>  contourFilter;
     vtkSmartPointer<vtkPolyDataMapper> mapper;
 
+    void ConstructInternal();
+
 public:
     Contour();
 

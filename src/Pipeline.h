@@ -207,7 +207,7 @@ namespace MantleIO {
 
 namespace Pipe {
 
-    // A class that can take an input stream
+    // A class that can take an assignAttribute stream
     // -----------------
     // Utility pipelines
 

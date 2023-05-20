@@ -12,8 +12,10 @@ private:
     IsoVolume(const IsoVolume &)      = delete;
     void operator=(const IsoVolume &) = delete;
 
-    vtkSmartPointer<vtkAssignAttribute> input;
+    vtkSmartPointer<vtkGPUVolumeRayCastMapper> volumeRayMapper;
     vtkSmartPointer<vtkVolume>          mVolume;
+
+    void ConstructInternal();
 
 public:
     IsoVolume();

@@ -47,7 +47,7 @@ void LIConvolution::ConstructInternal()
 void LIConvolution::SetInputConnection(std::shared_ptr<Pipe::AllInput> pipelines)
 {
 #ifndef NDEBUG
-    std::cout << "LIC: Setting input connection" << std::endl;
+    std::cout << "LIC: Setting assignAttribute connection" << std::endl;
 #endif
     this->geometry->SetInputConnection(pipelines->velocityCalculator->GetOutputPort());
 }

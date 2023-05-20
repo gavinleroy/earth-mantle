@@ -3,8 +3,13 @@
 
 IsoVolume::IsoVolume()
 {
-    this->input   = vtkSmartPointer<vtkAssignAttribute>::New();
-    this->mVolume = vtkSmartPointer<vtkVolume>::New();
+    volumeRayMapper = vtkSmartPointer<vtkGPUVolumeRayCastMapper>::New();
+    mVolume = vtkSmartPointer<vtkVolume>::New();
+    ConstructInternal();
+}
+
+void IsoVolume::ConstructInternal()
+{
 
     double                           range[] = { -1100., 1100. };
     vtkNew<vtkColorTransferFunction> colorTransferFunction;
@@ -26,13 +31,7 @@ IsoVolume::IsoVolume()
     opacityTransferFunction->AddPoint(151, 1.);
     opacityTransferFunction->AddPoint(1100, 1.);
 
-    MantleIO::MantleAttr property = MantleIO::MantleAttr::TempAnom;
-    this->input->Assign(property.c_str(), vtkDataSetAttributes::SCALARS,
-                        vtkAssignAttribute::POINT_DATA);
-
-    vtkNew<vtkGPUVolumeRayCastMapper> volumeRayMapper;
     volumeRayMapper->SetBlendModeToComposite();
-    volumeRayMapper->SetInputConnection(this->input->GetOutputPort());
     volumeRayMapper->SetAutoAdjustSampleDistances(true);
     volumeRayMapper->SetUseJittering(true);
 
@@ -51,8 +50,7 @@ IsoVolume::IsoVolume()
 
 void IsoVolume::SetInputConnection(std::shared_ptr<Pipe::AllInput> pipelines)
 {
-    throw "NYI";
-    // this->input->SetInputConnection(cin);
+    this->volumeRayMapper->SetInputConnection(pipelines->assignAttr->GetOutputPort());
 }
 
 void IsoVolume::ConnectToScene(vtkSmartPointer<vtkRenderer> renderer)
