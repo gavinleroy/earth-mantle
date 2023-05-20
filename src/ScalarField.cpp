@@ -13,14 +13,14 @@ ScalarField::ScalarField()
     planeSource->SetOrigin(-radius, -radius, 0);
     planeSource->SetPoint1(2*radius,-radius, 0);
     planeSource->SetPoint2(-radius, 2*radius, 0);
-    planeSource->SetResolution(100, 100);
+    planeSource->SetResolution(400, 400);
 
     // Core source
     vtkNew<vtkSphereSource> coreSource;
     coreSource->SetCenter(0, 0, 0);
-    coreSource->SetRadius(5000);
-    coreSource->SetThetaResolution(100);
-    coreSource->SetPhiResolution(100);
+    coreSource->SetRadius(4000);
+    coreSource->SetThetaResolution(400);
+    coreSource->SetPhiResolution(400);
 
     vtkNew<vtkAppendPolyData> appendPolyData;
     appendPolyData->AddInputConnection(planeSource->GetOutputPort());
