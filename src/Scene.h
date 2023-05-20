@@ -26,15 +26,16 @@ enum class EarthView {
 
 // TODO: add everything else
 enum class VolumeView {
+    Volume = 0,
     // ...
 };
 
-using EarthMappings = std::unordered_map<EarthView, std::shared_ptr<Pipe::ActorMapped>>;
+using EarthMappings  = std::unordered_map<EarthView, std::shared_ptr<Pipe::ActorMapped>>;
 using VolumeMappings = std::unordered_map<VolumeView, std::shared_ptr<Pipe::VolumeMapped>>;
 
 class Scene {
 private:
-    Scene(const Scene &)          = delete;  // Delete the copy-constructor.
+    Scene(const Scene &) = delete;           // Delete the copy-constructor.
     void operator=(const Scene &) = delete;  // Delete the assignment operator.
 
     // The current shown mappings (if any)
@@ -49,6 +50,7 @@ private:
     vtkSmartPointer<vtkRenderer> renderer;
 
     void SetMapping(EarthView idx);
+    void SetVolume(VolumeView idx);
 
 public:
     Scene();

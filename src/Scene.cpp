@@ -10,8 +10,12 @@ Scene::Scene()
     geometry       = std::make_unique<Geometry::Geometry>();
     inputPipelines = std::make_shared<Pipe::AllInput>();
 
+#ifndef NDEBUG
+    std::cout << "SCENE: building new mappings" << std::endl;
+#endif
+
     // Initialize earth mappings
-    currentEarthMapper = EarthView::Contour;
+    currentEarthMapper = {};
     earthMappers       = EarthMappings({
         {
             EarthView::LIC,
@@ -25,8 +29,15 @@ Scene::Scene()
         // TODO: add the rest of the mappings
     });
 
-    currentEarthVolume = {};
-    earthVolumes       = VolumeMappings();
+#ifndef NDEBUG
+    std::cout << "SCENE: building new volumes" << std::endl;
+#endif
+
+    currentEarthVolume = VolumeView::Volume;
+    earthVolumes       = VolumeMappings({ {
+        VolumeView::Volume,
+        std::make_shared<Volumes>(inputPipelines),
+    } });
 }
 
 void Scene::InitRenderer(vtkSmartPointer<vtkRenderer> renderer)
@@ -39,6 +50,9 @@ void Scene::InitRenderer(vtkSmartPointer<vtkRenderer> renderer)
     this->renderer = renderer;
 
     // this->geometry->ConnectToScene(this->renderer);
+
+    if (this->currentEarthVolume.has_value())
+        SetVolume(this->currentEarthVolume.value());
 
     if (this->currentEarthMapper.has_value())
         SetMapping(this->currentEarthMapper.value());
@@ -64,6 +78,16 @@ void Scene::SetMapping(EarthView idx)
     renderer->AddActor(act);
 
     this->geometry->SetActiveMapper(mapper);
+}
+
+void Scene::SetVolume(VolumeView idx)
+{
+#ifndef NDEBUG
+    std::cout << "SCENE: Setting mapping" << std::endl;
+#endif
+    auto volume = this->earthVolumes[idx];
+    volume->SetInputConnection(this->inputPipelines);
+    volume->ConnectToScene(this->renderer);
 }
 
 void Scene::InitUI(vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor)

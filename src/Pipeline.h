@@ -231,6 +231,12 @@ namespace Pipe {
             cellToPoint->SetInputConnection(cin);
         }
 
+        void Print(std::ostream &out)
+        {
+            resampler->Update();
+            resampler->Print(out);
+        }
+
         void SetInputConnection(std::shared_ptr<AllInput> pipelines)
         {
             throw "NYI";
@@ -238,8 +244,8 @@ namespace Pipe {
 
         vtkAlgorithmOutput *GetOutputPort()
         {
-            return cellToPoint->GetOutputPort();
-            // return resampler->GetOutputPort();
+            // return cellToPoint->GetOutputPort();
+            return resampler->GetOutputPort();
         }
     };
 
@@ -282,9 +288,9 @@ namespace Pipe {
     public:
         TempAnomAttribute()
         {
-            MantleIO::MantleAttr tempanom = MantleIO::MantleAttr::TempAnom;
+            MantleIO::MantleAttr property = MantleIO::MantleAttr::TempAnom;
             assignAttribute               = vtkSmartPointer<vtkAssignAttribute>::New();
-            assignAttribute->Assign(tempanom.c_str(), vtkDataSetAttributes::SCALARS,
+            assignAttribute->Assign(property.c_str(), vtkDataSetAttributes::SCALARS,
                                     vtkAssignAttribute::POINT_DATA);
         }
 
@@ -296,6 +302,12 @@ namespace Pipe {
         void SetInputConnection(std::shared_ptr<AllInput> pipelines)
         {
             throw "NYI";
+        }
+
+        void Print(std::ostream &out)
+        {
+            assignAttribute->Update();
+            assignAttribute->Print(out);
         }
 
         vtkAlgorithmOutput *GetOutputPort()

@@ -14,16 +14,16 @@
 
 class Volumes : public Pipe::VolumeMapped {
 private:
-    Volumes(const Volumes &)        = delete;  // Delete the copy-constructor.
+    Volumes(const Volumes &) = delete;         // Delete the copy-constructor.
     void operator=(const Volumes &) = delete;  // Delete the assignment operator.
 
     vtkSmartPointer<vtkSmartVolumeMapper> volumeMapper;
-    vtkSmartPointer<vtkVolume>          mVolume;
-
-    void ConstructInternal();
+    vtkSmartPointer<vtkVolume>            mVolume;
+    void                                  ConstructInternal();
 
 public:
     Volumes();
+    Volumes(std::shared_ptr<Pipe::AllInput> pipelines);
     ~Volumes() { }
 
     void SetInputConnection(std::shared_ptr<Pipe::AllInput> pipelines);

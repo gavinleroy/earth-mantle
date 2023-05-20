@@ -2,16 +2,38 @@
 
 Volumes::Volumes()
 {
-    mVolume         = vtkSmartPointer<vtkVolume>::New();
+#ifndef NDEBUG
+    std::cout << "VOLUMES: building with no args" << std::endl;
+#endif
+
+    mVolume      = vtkSmartPointer<vtkVolume>::New();
     volumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
+    ConstructInternal();
+}
+
+Volumes::Volumes(std::shared_ptr<Pipe::AllInput> pipelines)
+{
+#ifndef NDEBUG
+    std::cout << "VOLUMES: building with input pipelines" << std::endl;
+#endif
+
+    mVolume      = vtkSmartPointer<vtkVolume>::New();
+    volumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
+    SetInputConnection(pipelines);
+
     ConstructInternal();
 }
 
 void Volumes::ConstructInternal()
 {
+#ifndef NDEBUG
+    std::cout << "VOLUMES: constructing internal objects" << std::endl;
+#endif
+
     double range[] = { -1100., 1100. };
 
-    MantleIO::MantleAttr property  = MantleIO::MantleAttr::TempAnom;
+    MantleIO::MantleAttr property = MantleIO::MantleAttr::TempAnom;
+
     // Create a color transfer function
     vtkNew<vtkColorTransferFunction> colorTransferFunction;
     colorTransferFunction->SetNanOpacity(1.0);
@@ -39,13 +61,13 @@ void Volumes::ConstructInternal()
     plane->SetOrigin(0., 0., 0.);
     plane->SetNormal(0., 1.0, 0);
 
-
     // Add a mapper to create graphic primitives from the data
 //    vtkNew<vtkSmartVolumeMapper> volumeMapper;
 #ifndef NDEBUG
-    std::cout << "Loading scalar array: " << property.c_str() << " for volume render"
-              << std::endl;
+    std::cout << "VOLUMES: loading scalar array: " << property.c_str()
+              << " for volume render" << std::endl;
 #endif
+    // volumeMapper->SetInputConnection(assignAttribute->GetOutputPort());
     volumeMapper->SelectScalarArray(property.c_str());
     volumeMapper->AddClippingPlane(plane);
     // volumeMapper->SetBlendModeToIsoSurface();
@@ -57,8 +79,10 @@ void Volumes::ConstructInternal()
 
 void Volumes::SetInputConnection(std::shared_ptr<Pipe::AllInput> pipelines)
 {
+#ifndef NDEBUG
+    std::cout << "VOLUMES: setting input connection" << std::endl;
+#endif
     volumeMapper->SetInputConnection(pipelines->assignAttr->GetOutputPort());
-    // this->assignAttribute->SetInputConnection(cin);
 }
 
 void Volumes::ConnectToScene(vtkSmartPointer<vtkRenderer> renderer)
