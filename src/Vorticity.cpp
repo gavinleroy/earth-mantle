@@ -41,7 +41,7 @@ Vorticity::Vorticity()
     thresholdPoints->SetInputConnection(vorticityCalculator->GetOutputPort());
     thresholdPoints->SetInputArrayToProcess(
             0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, "vorticity magnitude");
-    thresholdPoints->ThresholdBetween(0.035, 0.06);
+    thresholdPoints->ThresholdBetween(0.04, 0.06);
     vtkNew<vtkMaskPoints> maskPoints;
     maskPoints->SetInputConnection(thresholdPoints->GetOutputPort());
     maskPoints->SetOnRatio(1);
@@ -57,18 +57,18 @@ Vorticity::Vorticity()
     streamTracer->SetInputConnection(assignAttribute->GetOutputPort());
     streamTracer->SetSourceConnection(maskPoints->GetOutputPort());
     streamTracer->SetInterpolatorType(vtkStreamTracer::INTERPOLATOR_WITH_DATASET_POINT_LOCATOR);
-    streamTracer->SetIntegrationDirection(vtkStreamTracer::BOTH);
-    streamTracer->SetIntegratorType(vtkStreamTracer::RUNGE_KUTTA45);
+    streamTracer->SetIntegrationDirectionToBoth();
+    streamTracer->SetIntegratorTypeToRungeKutta45();
     streamTracer->SetIntegrationStepUnit(vtkStreamTracer::CELL_LENGTH_UNIT);
     streamTracer->SetTerminalSpeed(1e-12);
     streamTracer->SetMaximumError(1e-6);
-    streamTracer->SetMaximumPropagation(12000);
+    streamTracer->SetMaximumPropagation(5000);
     streamTracer->SetMaximumNumberOfSteps(2000);
 
     // Visualize the streamlines as tubes
     vtkNew<vtkTubeFilter> tubeFilter;
     tubeFilter->SetInputConnection(streamTracer->GetOutputPort());
-    tubeFilter->SetRadius(60);
+    tubeFilter->SetRadius(50);
     tubeFilter->SetNumberOfSides(6);
     tubeFilter->CappingOn();
 
