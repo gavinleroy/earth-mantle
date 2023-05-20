@@ -46,20 +46,22 @@
 // #include <vtkThreshold.h>
 // #include <vtkUnstructuredGrid.h>
 
+#include "Mantle.h"
 #include "Pipeline.h"
-#include "Resample.h"
 
-class Volumes : public Pipe::Pipeline, private Resample::Resample {
+class Volumes : public Pipe::VolumeMapped {
 private:
     Volumes(const Volumes &)        = delete;  // Delete the copy-constructor.
     void operator=(const Volumes &) = delete;  // Delete the assignment operator.
 
-    vtkSmartPointer<vtkVolume> mVolume;
+    vtkSmartPointer<vtkAssignAttribute> assignAttribute;
+    vtkSmartPointer<vtkVolume>          mVolume;
 
 public:
     Volumes();
     ~Volumes() { }
 
+    void SetInputConnection(vtkAlgorithmOutput *cin);
     void ConnectToScene(vtkSmartPointer<vtkRenderer> renderer);
     void RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer);
 };

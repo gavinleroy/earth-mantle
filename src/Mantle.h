@@ -52,6 +52,7 @@
 #include <filesystem>
 #include <optional>
 
+#include "Pipeline.h"
 
 namespace MantleIO {
     using cached_data                 = std::optional<vtkSmartPointer<vtkAlgorithm>>;
@@ -140,7 +141,7 @@ namespace MantleIO {
     };
 
 
-    class Mantle {
+    class Mantle : public Pipe::OutputPipeline {
     private:
         inline static const std::filesystem::path data_directory   = "../data/FullMantle";
         inline static size_t                      current_timestep = 1;
@@ -154,12 +155,9 @@ namespace MantleIO {
 
         static std::filesystem::path LocateFile(size_t time_step);
 
-    protected:
-        static vtkSmartPointer<vtkAlgorithm> GetCurrentStream();
-
     public:
         Mantle();
-        static void Step();
+        static void         Step();
+        vtkAlgorithmOutput *GetOutputPort();
     };
-
 }

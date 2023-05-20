@@ -2,12 +2,9 @@
 #include "IsoVolume.h"
 
 IsoVolume::IsoVolume()
-    : Resample::Resample()
 {
-    if (mVolume != nullptr) {
-        return;
-    }
-    mVolume = vtkSmartPointer<vtkVolume>::New();
+    this->input   = vtkSmartPointer<vtkAssignAttribute>::New();
+    this->mVolume = vtkSmartPointer<vtkVolume>::New();
 
     double                           range[] = { -1100., 1100. };
     vtkNew<vtkColorTransferFunction> colorTransferFunction;
@@ -29,25 +26,15 @@ IsoVolume::IsoVolume()
     opacityTransferFunction->AddPoint(151, 1.);
     opacityTransferFunction->AddPoint(1100, 1.);
 
-    MantleIO::MantleAttr property  = MantleIO::MantleAttr::TempAnom;
-    auto                 resampler = Resample::GetResampled();
-
-    vtkNew<vtkAssignAttribute> assignAttribute;
-    assignAttribute->SetInputConnection(resampler->GetOutputPort());
-    assignAttribute->Assign(property.c_str(), vtkDataSetAttributes::SCALARS,
-                            vtkAssignAttribute::POINT_DATA);
-
+    MantleIO::MantleAttr property = MantleIO::MantleAttr::TempAnom;
+    this->input->Assign(property.c_str(), vtkDataSetAttributes::SCALARS,
+                        vtkAssignAttribute::POINT_DATA);
 
     vtkNew<vtkGPUVolumeRayCastMapper> volumeRayMapper;
     volumeRayMapper->SetBlendModeToComposite();
-    volumeRayMapper->SetInputConnection(assignAttribute->GetOutputPort());
+    volumeRayMapper->SetInputConnection(this->input->GetOutputPort());
     volumeRayMapper->SetAutoAdjustSampleDistances(true);
     volumeRayMapper->SetUseJittering(true);
-
-    //    vtkSmartPointer<vtkPlane> plane = vtkSmartPointer<vtkPlane>::New();
-    //    plane->SetOrigin(0., 0., 0.);
-    //    plane->SetNormal(0., 1.0, 0);
-    //    volumeRayMapper->AddClippingPlane(plane);
 
     vtkNew<vtkVolumeProperty> volumeProperty;
     volumeProperty->SetInterpolationTypeToLinear();
@@ -62,6 +49,10 @@ IsoVolume::IsoVolume()
     mVolume->SetProperty(volumeProperty);
 }
 
+void IsoVolume::SetInputConnection(vtkAlgorithmOutput *cin)
+{
+    this->input->SetInputConnection(cin);
+}
 
 void IsoVolume::ConnectToScene(vtkSmartPointer<vtkRenderer> renderer)
 {

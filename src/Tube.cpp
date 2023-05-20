@@ -1,19 +1,15 @@
 #include "Tube.h"
 
 Tube::Tube()
-    : Mantle()
-    , streamlineActor(vtkSmartPointer<vtkActor>::New())
 {
-    auto structuredGrid = GetCurrentStream();
+    this->cellToPoint     = vtkSmartPointer<vtkCellDataToPointData>::New();
+    this->streamlineActor = vtkSmartPointer<vtkActor>::New();
 
     vtkNew<vtkLookupTable> ctf;
     ctf->SetVectorMode(vtkScalarsToColors::MAGNITUDE);
     ctf->SetHueRange(0.0, 0.2);
     ctf->SetValueRange(1, 1);
     ctf->SetSaturationRange(0.5, 0.5);
-
-    vtkNew<vtkCellDataToPointData> cellToPoint;
-    cellToPoint->SetInputConnection(structuredGrid->GetOutputPort());
 
     vtkNew<vtkArrayCalculator> calculator;
     calculator->SetInputConnection(cellToPoint->GetOutputPort());
@@ -86,12 +82,17 @@ Tube::Tube()
     streamlineActor->VisibilityOn();
 }
 
+void Tube::SetInputConnection(vtkAlgorithmOutput *cin)
+{
+    this->cellToPoint->SetInputConnection(cin);
+}
+
 void Tube::ConnectToScene(vtkSmartPointer<vtkRenderer> renderer)
 {
-    renderer->AddActor(streamlineActor);
+    renderer->AddActor(this->streamlineActor);
 }
 
 void Tube::RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer)
 {
-    renderer->RemoveActor(streamlineActor);
+    renderer->RemoveActor(this->streamlineActor);
 }

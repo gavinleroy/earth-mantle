@@ -1,23 +1,12 @@
-
 #include "Contour.h"
 
 Contour::Contour()
-    : Resample::Resample()
 {
-    if (mContour != nullptr) {
-        return;
-    }
-    mContour                       = vtkSmartPointer<vtkActor>::New();
-    MantleIO::MantleAttr property  = MantleIO::MantleAttr::TempAnom;
-    auto                 resampler = Resample::GetResampled();
+    this->contourFilter = vtkSmartPointer<vtkContourFilter>::New();
+    this->mapper        = vtkSmartPointer<vtkPolyDataMapper>::New();
 
-    vtkNew<vtkAssignAttribute> assignAttribute;
-    assignAttribute->SetInputConnection(resampler->GetOutputPort());
-    assignAttribute->Assign(property.c_str(), vtkDataSetAttributes::SCALARS,
-                            vtkAssignAttribute::POINT_DATA);
+    MantleIO::MantleAttr property = MantleIO::MantleAttr::TempAnom;
 
-    vtkNew<vtkContourFilter> contourFilter;
-    contourFilter->SetInputConnection(assignAttribute->GetOutputPort());
     contourFilter->SetInputArrayToProcess(
         0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, property.c_str());
     //    contourFilter->GenerateValues(10, -1100, 1100);
@@ -25,11 +14,6 @@ Contour::Contour()
     contourFilter->SetValue(0, -150);
     contourFilter->SetValue(1, 0);
     contourFilter->SetValue(2, 200);
-    vtkNew<vtkPolyDataMapper> polyMapper;
-
-    vtkSmartPointer<vtkPlane> plane = vtkSmartPointer<vtkPlane>::New();
-    plane->SetOrigin(0., 0., 0.);
-    plane->SetNormal(0., 1.0, 0);
 
     vtkNew<vtkLookupTable> lut;
     lut->SetVectorMode(vtkScalarsToColors::MAGNITUDE);
@@ -37,22 +21,22 @@ Contour::Contour()
     lut->SetValueRange(1, 1);
     lut->SetSaturationRange(.8, .8);
 
-    polyMapper->SetInputConnection(contourFilter->GetOutputPort());
-    polyMapper->SelectColorArray(property.c_str());
-    polyMapper->AddClippingPlane(plane);
-    polyMapper->SetLookupTable(lut);
-
-    mContour->SetMapper(polyMapper);
-    mContour->GetProperty()->SetLineWidth(5);
-    mContour->VisibilityOn();
+    // Save the mapper internally so we can attach to the scene later.
+    this->mapper->SetInputConnection(contourFilter->GetOutputPort());
+    this->mapper->SelectColorArray(property.c_str());
+    this->mapper->SetLookupTable(lut);
 }
 
-void Contour::ConnectToScene(vtkSmartPointer<vtkRenderer> renderer)
+
+void Contour::SetInputConnection(vtkAlgorithmOutput *cin)
 {
-    renderer->AddActor(mContour);
+    // NOTE: expects property assigned attributes.
+    contourFilter->SetInputConnection(cin);
 }
 
-void Contour::RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer)
+void Contour::ConnectToActor(vtkSmartPointer<vtkActor> actor)
 {
-    renderer->RemoveActor(mContour);
+    actor->SetMapper(this->mapper);
+    actor->GetProperty()->SetLineWidth(5);
+    actor->VisibilityOn();
 }

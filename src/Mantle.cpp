@@ -45,9 +45,9 @@ namespace MantleIO {
         return resolved;
     }
 
-    vtkSmartPointer<vtkAlgorithm> Mantle::GetCurrentStream()
+    vtkAlgorithmOutput *Mantle::GetOutputPort()
     {
-        return globalReader;
+        return globalReader->GetOutputPort();
     }
 
     void Mantle::Step()
@@ -70,4 +70,6 @@ namespace MantleIO {
             elems.push_back(MantleAttr(static_cast<Value>(i)));
         return elems;
     }
+
+
 }

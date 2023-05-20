@@ -57,16 +57,19 @@
 #include "Mantle.h"
 #include "Pipeline.h"
 
-class Tube : private MantleIO::Mantle, public Pipe::Pipeline {
+class Tube : public Pipe::VolumeMapped {
 private:
     Tube(const Tube &)           = delete;  // Delete the copy-constructor.
     void operator=(const Tube &) = delete;  // Delete the assignment operator.
 
-    vtkSmartPointer<vtkActor> streamlineActor;
+    vtkSmartPointer<vtkCellDataToPointData> cellToPoint;
+    vtkSmartPointer<vtkActor>               streamlineActor;
 
 public:
     Tube();
     ~Tube() { }
+
+    void SetInputConnection(vtkAlgorithmOutput *cin);
     void ConnectToScene(vtkSmartPointer<vtkRenderer> renderer);
     void RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer);
 };

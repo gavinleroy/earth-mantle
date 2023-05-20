@@ -3,14 +3,12 @@
 #include <vtkDataSetAttributes.h>
 
 Volumes::Volumes()
-    : Resample::Resample()
-    , mVolume(vtkSmartPointer<vtkVolume>::New())
 {
-    MantleIO::MantleAttr property  = MantleIO::MantleAttr::TempAnom;
-    auto                 resampler = Resample::GetResampled();
+    this->mVolume         = vtkSmartPointer<vtkVolume>::New();
+    this->assignAttribute = vtkSmartPointer<vtkAssignAttribute>::New();
 
-    vtkNew<vtkAssignAttribute> assignAttribute;
-    assignAttribute->SetInputConnection(resampler->GetOutputPort());
+    MantleIO::MantleAttr property = MantleIO::MantleAttr::TempAnom;
+
     assignAttribute->Assign(property.c_str(), vtkDataSetAttributes::SCALARS,
                             vtkAssignAttribute::POINT_DATA);
 
@@ -64,6 +62,11 @@ Volumes::Volumes()
     this->mVolume->SetProperty(volumeProperty);
     // TODO adjust this offset so the scene looks nice
     // this->mVolume->SetPosition(14000, 0, 14000);
+}
+
+void Volumes::SetInputConnection(vtkAlgorithmOutput *cin)
+{
+    this->assignAttribute->SetInputConnection(cin);
 }
 
 void Volumes::ConnectToScene(vtkSmartPointer<vtkRenderer> renderer)

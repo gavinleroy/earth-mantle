@@ -11,17 +11,21 @@
 #include "Mantle.h"
 #include "Pipeline.h"
 
-class LIConvolution : private MantleIO::Mantle, public Pipe::Pipeline {
+class LIConvolution : public Pipe::ActorMapped {
 private:
     LIConvolution(const LIConvolution &)  = delete;  // Delete the copy-constructor.
     void operator=(const LIConvolution &) = delete;  // Delete the assignment operator.
 
-    vtkSmartPointer<vtkActor> mActor;
+    vtkSmartPointer<vtkGeometryFilter>   geometry;
+    vtkSmartPointer<vtkSurfaceLICMapper> mapper;
+
+    void ConstructInternal();
 
 public:
     LIConvolution();
+    LIConvolution(vtkAlgorithmOutput *input);
     ~LIConvolution() { }
 
-    void ConnectToScene(vtkSmartPointer<vtkRenderer> renderer);
-    void RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer);
+    void ConnectToActor(vtkSmartPointer<vtkActor> actor);
+    void SetInputConnection(vtkAlgorithmOutput *input);
 };

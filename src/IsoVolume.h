@@ -1,22 +1,25 @@
 #pragma once
 
-#include "Pipeline.h"
-#include "Resample.h"
-
 #include <vtkGPUVolumeRayCastMapper.h>
 #include <vtkColorTransferFunction.h>
 #include <vtkPiecewiseFunction.h>
 #include <vtkVolumeProperty.h>
 
-class IsoVolume : public Pipe::Pipeline, private Resample::Resample {
+#include "Mantle.h"
+#include "Pipeline.h"
+
+class IsoVolume : public Pipe::VolumeMapped {
 private:
     IsoVolume(const IsoVolume &)      = delete;
     void operator=(const IsoVolume &) = delete;
 
-    inline static vtkSmartPointer<vtkVolume> mVolume = nullptr;
+    vtkSmartPointer<vtkAssignAttribute> input;
+    vtkSmartPointer<vtkVolume>          mVolume;
 
 public:
     IsoVolume();
-    void ConnectToScene(vtkSmartPointer<vtkRenderer> renderer) override;
-    void RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer) override;
+
+    void SetInputConnection(vtkAlgorithmOutput *input);
+    void ConnectToScene(vtkSmartPointer<vtkRenderer> renderer);
+    void RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer);
 };

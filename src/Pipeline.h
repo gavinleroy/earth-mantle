@@ -50,13 +50,43 @@
 #include <vtkArrayCalculator.h>
 
 namespace Pipe {
-    class Pipeline {
+    // A class that can take an input stream
+    class InputPipeline {
+    public:
+        virtual ~InputPipeline() { }
+        virtual void SetInputConnection(vtkAlgorithmOutput *cin) = 0;
+    };
+
+    // A class that produces an output stream
+    class OutputPipeline {
+    public:
+        virtual ~OutputPipeline() { }
+        virtual vtkAlgorithmOutput *GetOutputPort() = 0;
+    };
+
+    // Input/Output streams
+    class Pipeline : public OutputPipeline, public InputPipeline {
     public:
         virtual ~Pipeline() { }
+    };
+
+    // ------------------------------
+    // Used for outputing visual data
+
+    // Represents classes that work on the earth itself. LIC, contours, etc ...
+    class ActorMapped : public InputPipeline {
+    public:
+        virtual ~ActorMapped() { }
+
+        virtual void ConnectToActor(vtkSmartPointer<vtkActor> actor) = 0;
+    };
+
+    // Represents classes that
+    class VolumeMapped : public InputPipeline {
+    public:
+        virtual ~VolumeMapped() { }
 
         virtual void ConnectToScene(vtkSmartPointer<vtkRenderer> renderer)  = 0;
         virtual void RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer) = 0;
-        // virtual void SetInputConnection(vtkAlgorithmOutput *input)          = 0;
-        // virtual vtkAlgorithmOutput *GetOutputPort()                         = 0;
     };
 }

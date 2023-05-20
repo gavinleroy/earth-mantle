@@ -72,6 +72,7 @@ void Window::Loop()
         }
 
         // render the frame anew
+        mScene->Update(dt.count(), t.count());
         mRenderWindow->Render();
         mRenderWindowInteractor->ProcessEvents();
     }
