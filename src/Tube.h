@@ -51,19 +51,23 @@
 #include <vtkColorTransferFunction.h>
 #include <vtkThreshold.h>
 #include <vtkMaskPoints.h>
+#include <vtkCellDataToPointData.h>
 
 #include "Pipeline.h"
 
 class Tube : public Pipe::VolumeMapped {
 private:
-    Tube(const Tube &)           = delete;  // Delete the copy-constructor.
+    Tube(const Tube &) = delete;            // Delete the copy-constructor.
     void operator=(const Tube &) = delete;  // Delete the assignment operator.
 
     vtkSmartPointer<vtkCellDataToPointData> cellToPoint;
     vtkSmartPointer<vtkActor>               streamlineActor;
 
+    void ConstructInternal();
+
 public:
     Tube();
+    Tube(std::shared_ptr<Pipe::AllInput> pipelines);
     ~Tube() { }
 
     void SetInputConnection(std::shared_ptr<Pipe::AllInput> pipelines);

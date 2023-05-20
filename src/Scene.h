@@ -27,6 +27,8 @@ enum class EarthView {
 // TODO: add everything else
 enum class VolumeView {
     Volume = 0,
+    IsoVolume,
+    Tubes,
     // ...
 };
 

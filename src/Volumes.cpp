@@ -81,6 +81,7 @@ void Volumes::SetInputConnection(std::shared_ptr<Pipe::AllInput> pipelines)
 {
 #ifndef NDEBUG
     std::cout << "VOLUMES: setting input connection" << std::endl;
+    pipelines->assignAttr->Print(std::cout);
 #endif
     volumeMapper->SetInputConnection(pipelines->assignAttr->GetOutputPort());
 }

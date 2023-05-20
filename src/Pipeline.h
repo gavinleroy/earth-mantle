@@ -53,6 +53,9 @@
 
 // Forward decls
 namespace Pipe {
+
+    inline const uint32_t SAMPLING_DIM = 200;
+
     struct AllInput;
     class Resample;
     class VelocityCalculator;
@@ -211,24 +214,51 @@ namespace Pipe {
     // -----------------
     // Utility pipelines
 
-    class Resample : public Pipeline {
-    private:
-        vtkSmartPointer<vtkResampleToImage>     resampler;
+    class CellToPoint : public Pipeline {
+    public:
         vtkSmartPointer<vtkCellDataToPointData> cellToPoint;
 
-    public:
-        Resample()
+        CellToPoint()
         {
             cellToPoint = vtkSmartPointer<vtkCellDataToPointData>::New();
-
-            resampler = vtkSmartPointer<vtkResampleToImage>::New();
-            resampler->SetInputConnection(cellToPoint->GetOutputPort());
-            resampler->SetSamplingDimensions(200, 200, 200);
         }
 
         void SetInputConnection(vtkAlgorithmOutput *cin)
         {
             cellToPoint->SetInputConnection(cin);
+        }
+
+        void Print(std::ostream &out)
+        {
+            cellToPoint->Update();
+            cellToPoint->Print(out);
+        }
+
+        void SetInputConnection(std::shared_ptr<AllInput> pipelines)
+        {
+            throw "NYI";
+        }
+
+        vtkAlgorithmOutput *GetOutputPort()
+        {
+            return cellToPoint->GetOutputPort();
+        }
+    };
+
+    class Resample : public Pipeline {
+    private:
+        vtkSmartPointer<vtkResampleToImage> resampler;
+
+    public:
+        Resample()
+        {
+            resampler = vtkSmartPointer<vtkResampleToImage>::New();
+            resampler->SetSamplingDimensions(SAMPLING_DIM, SAMPLING_DIM, SAMPLING_DIM);
+        }
+
+        void SetInputConnection(vtkAlgorithmOutput *cin)
+        {
+            resampler->SetInputConnection(cin);
         }
 
         void Print(std::ostream &out)
@@ -244,7 +274,6 @@ namespace Pipe {
 
         vtkAlgorithmOutput *GetOutputPort()
         {
-            // return cellToPoint->GetOutputPort();
             return resampler->GetOutputPort();
         }
     };
@@ -262,6 +291,12 @@ namespace Pipe {
             calculator->AddScalarVariable("vy", "vy");
             calculator->AddScalarVariable("vz", "vz");
             calculator->SetFunction("(iHat * vx + jHat * vy + kHat * vz) * 1e9");
+        }
+
+        void Print(std::ostream &out)
+        {
+            calculator->Update();
+            calculator->Print(out);
         }
 
         void SetInputConnection(vtkAlgorithmOutput *cin)
@@ -321,28 +356,38 @@ namespace Pipe {
 
     struct AllInput {
         std::shared_ptr<MantleIO::Mantle>   reader;
+        std::shared_ptr<CellToPoint>        cellToPoint;
         std::shared_ptr<Resample>           resampled;
-        std::shared_ptr<VelocityCalculator> velocityCalculator;
+        std::shared_ptr<VelocityCalculator> imageVelocityCalculator;
+        std::shared_ptr<VelocityCalculator> otherVelocityCalculator;
         std::shared_ptr<TempAnomAttribute>  assignAttr;
 
         AllInput()
         {
-            reader             = std::make_shared<MantleIO::Mantle>();
-            resampled          = std::make_shared<Pipe::Resample>();
-            velocityCalculator = std::make_shared<Pipe::VelocityCalculator>();
-            assignAttr         = std::make_shared<Pipe::TempAnomAttribute>();
+            reader                  = std::make_shared<MantleIO::Mantle>();
+            cellToPoint             = std::make_shared<CellToPoint>();
+            resampled               = std::make_shared<Resample>();
+            imageVelocityCalculator = std::make_shared<VelocityCalculator>();
+            otherVelocityCalculator = std::make_shared<VelocityCalculator>();
+            assignAttr              = std::make_shared<TempAnomAttribute>();
 
             // NOTE: this is super fragile!
             //       Be very careful during initialization.
 
-            // mantle -> resampled
-            resampled->SetInputConnection(reader->GetOutputPort());
+            // mantle -> cell to poin
+            cellToPoint->SetInputConnection(reader->GetOutputPort());
+
+            // mantle -> cell to point -> resampled
+            resampled->SetInputConnection(cellToPoint->GetOutputPort());
+
+            // mantle -> cell to point -> velocity
+            otherVelocityCalculator->SetInputConnection(cellToPoint->GetOutputPort());
+
+            // mantle -> cell to point -> resampled -> velocity
+            imageVelocityCalculator->SetInputConnection(resampled->GetOutputPort());
 
             // mantle -> resampled -> attribute assigned
             assignAttr->SetInputConnection(resampled->GetOutputPort());
-
-            // mantle -> resampled -> velocity
-            velocityCalculator->SetInputConnection(resampled->GetOutputPort());
         }
     };
 }

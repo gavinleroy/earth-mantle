@@ -49,7 +49,8 @@ void LIConvolution::SetInputConnection(std::shared_ptr<Pipe::AllInput> pipelines
 #ifndef NDEBUG
     std::cout << "LIC: Setting assignAttribute connection" << std::endl;
 #endif
-    this->geometry->SetInputConnection(pipelines->velocityCalculator->GetOutputPort());
+    this->geometry->SetInputConnection(
+        pipelines->imageVelocityCalculator->GetOutputPort());
 }
 
 void LIConvolution::ConnectToActor(vtkSmartPointer<vtkActor> actor)

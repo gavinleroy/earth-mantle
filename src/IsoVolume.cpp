@@ -4,13 +4,12 @@
 IsoVolume::IsoVolume()
 {
     volumeRayMapper = vtkSmartPointer<vtkGPUVolumeRayCastMapper>::New();
-    mVolume = vtkSmartPointer<vtkVolume>::New();
+    mVolume         = vtkSmartPointer<vtkVolume>::New();
     ConstructInternal();
 }
 
 void IsoVolume::ConstructInternal()
 {
-
     double                           range[] = { -1100., 1100. };
     vtkNew<vtkColorTransferFunction> colorTransferFunction;
     colorTransferFunction->SetNanOpacity(1.0);

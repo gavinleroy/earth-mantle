@@ -19,8 +19,7 @@ Scene::Scene()
     earthMappers       = EarthMappings({
         {
             EarthView::LIC,
-            std::make_shared<LIConvolution>(  // velocityCalculator->GetOutputPort()
-                ),
+            std::make_shared<LIConvolution>(),
         },
         {
             EarthView::Contour,
@@ -34,10 +33,20 @@ Scene::Scene()
 #endif
 
     currentEarthVolume = VolumeView::Volume;
-    earthVolumes       = VolumeMappings({ {
-        VolumeView::Volume,
-        std::make_shared<Volumes>(inputPipelines),
-    } });
+    earthVolumes       = VolumeMappings({
+        {
+            VolumeView::Volume,
+            std::make_shared<Volumes>(),
+        },
+        {
+            VolumeView::IsoVolume,
+            std::make_shared<IsoVolume>(),
+        },
+        {
+            VolumeView::Tubes,
+            std::make_shared<Tube>(),
+        },
+    });
 }
 
 void Scene::InitRenderer(vtkSmartPointer<vtkRenderer> renderer)
