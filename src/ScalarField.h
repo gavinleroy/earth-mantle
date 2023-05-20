@@ -1,9 +1,11 @@
 #pragma once
 
 #include <vtkPlaneSource.h>
+#include <vtkSphereSource.h>
+#include <vtkClipPolyData.h>
+#include <vtkAppendPolyData.h>
 #include <vtkGaussianKernel.h>
 #include <vtkPointInterpolator.h>
-#include <vtkGeometryFilter.h>
 
 #include "Pipeline.h"
 #include "Resample.h"

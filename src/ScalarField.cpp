@@ -15,6 +15,17 @@ ScalarField::ScalarField()
     planeSource->SetPoint2(-radius, 2*radius, 0);
     planeSource->SetResolution(100, 100);
 
+    // Core source
+    vtkNew<vtkSphereSource> coreSource;
+    coreSource->SetCenter(0, 0, 0);
+    coreSource->SetRadius(5000);
+    coreSource->SetThetaResolution(100);
+    coreSource->SetPhiResolution(100);
+
+    vtkNew<vtkAppendPolyData> appendPolyData;
+    appendPolyData->AddInputConnection(planeSource->GetOutputPort());
+    appendPolyData->AddInputConnection(coreSource->GetOutputPort());
+
     // Gaussian kernel
     vtkNew<vtkGaussianKernel> gaussianKernel;
     gaussianKernel->SetSharpness(2.0);
@@ -23,7 +34,7 @@ ScalarField::ScalarField()
     // Point interpolator
     vtkNew<vtkPointInterpolator> pointInterpolator;
     pointInterpolator->SetSourceConnection(data->GetOutputPort());
-    pointInterpolator->SetInputConnection(planeSource->GetOutputPort());
+    pointInterpolator->SetInputConnection(appendPolyData->GetOutputPort());
     pointInterpolator->SetKernel(gaussianKernel);
 
     // Create a color transfer function
