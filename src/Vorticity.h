@@ -1,7 +1,12 @@
 #pragma once
 
+#include <vtkArrayCalculator.h>
 #include <vtkGradientFilter.h>
-#include <vtkContourFilter.h>
+#include <vtkThresholdPoints.h>
+#include <vtkMaskPoints.h>
+#include <vtkAssignAttribute.h>
+#include <vtkStreamTracer.h>
+#include <vtkTubeFilter.h>
 #include <vtkPolyDataMapper.h>
 
 #include "Mantle.h"

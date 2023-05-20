@@ -36,27 +36,45 @@ Vorticity::Vorticity()
     vorticityCalculator->AddVectorVariable("vorticity", "vorticity");
     vorticityCalculator->SetFunction("sqrt(dot(vorticity, vorticity))");
 
-    // According to VTK, the range of vorticity magnitude is: [0, 0.539739]
+    // Filter by the vorticity magnitude
+    vtkNew<vtkThresholdPoints> thresholdPoints;
+    thresholdPoints->SetInputConnection(vorticityCalculator->GetOutputPort());
+    thresholdPoints->SetInputArrayToProcess(
+            0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, "vorticity magnitude");
+    thresholdPoints->ThresholdBetween(0.035, 0.06);
+    vtkNew<vtkMaskPoints> maskPoints;
+    maskPoints->SetInputConnection(thresholdPoints->GetOutputPort());
+    maskPoints->SetOnRatio(1);
 
+    // Assign the velocity attribute
     vtkNew<vtkAssignAttribute> assignAttribute;
     assignAttribute->SetInputConnection(vorticityCalculator->GetOutputPort());
-    assignAttribute->Assign("vorticity magnitude", vtkDataSetAttributes::SCALARS,
+    assignAttribute->Assign("velocity", vtkDataSetAttributes::VECTORS,
                             vtkAssignAttribute::POINT_DATA);
 
-    vtkNew<vtkContourFilter> contourFilter;
-    contourFilter->SetInputConnection(assignAttribute->GetOutputPort());
-    contourFilter->SetInputArrayToProcess(
-            0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, "vorticity magnitude");
-    contourFilter->SetValue(0, .03);
+    // Trace the streamlines
+    vtkNew<vtkStreamTracer> streamTracer;
+    streamTracer->SetInputConnection(assignAttribute->GetOutputPort());
+    streamTracer->SetSourceConnection(maskPoints->GetOutputPort());
+    streamTracer->SetInterpolatorType(vtkStreamTracer::INTERPOLATOR_WITH_DATASET_POINT_LOCATOR);
+    streamTracer->SetIntegrationDirection(vtkStreamTracer::BOTH);
+    streamTracer->SetIntegratorType(vtkStreamTracer::RUNGE_KUTTA45);
+    streamTracer->SetIntegrationStepUnit(vtkStreamTracer::CELL_LENGTH_UNIT);
+    streamTracer->SetTerminalSpeed(1e-12);
+    streamTracer->SetMaximumError(1e-6);
+    streamTracer->SetMaximumPropagation(12000);
+    streamTracer->SetMaximumNumberOfSteps(2000);
 
+    // Visualize the streamlines as tubes
+    vtkNew<vtkTubeFilter> tubeFilter;
+    tubeFilter->SetInputConnection(streamTracer->GetOutputPort());
+    tubeFilter->SetRadius(60);
+    tubeFilter->SetNumberOfSides(6);
+    tubeFilter->CappingOn();
+
+    // Map the poly data
     vtkNew<vtkPolyDataMapper> polyDataMapper;
-    polyDataMapper->SetInputConnection(contourFilter->GetOutputPort());
-
-    vtkNew<vtkPlane> clippingPlane;
-    clippingPlane->SetOrigin(0.0, 0.0, 0.0);
-    clippingPlane->SetNormal(0.0, 1.0, 0.0);
-    polyDataMapper->AddClippingPlane(clippingPlane);
-
+    polyDataMapper->SetInputConnection(tubeFilter->GetOutputPort());
     mActor->SetMapper(polyDataMapper);
 }
 
