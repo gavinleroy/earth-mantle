@@ -11,40 +11,35 @@ Contour::Contour()
     MantleIO::MantleAttr property  = MantleIO::MantleAttr::TempAnom;
     auto                 resampler = Resample::GetResampled();
 
-    vtkNew<vtkAssignAttribute> assignAttribute;
-    assignAttribute->SetInputConnection(resampler->GetOutputPort());
-    assignAttribute->Assign(property.c_str(), vtkDataSetAttributes::SCALARS,
-                            vtkAssignAttribute::POINT_DATA);
+    vtkNew<vtkGeometryFilter> geometryFilter;
+    geometryFilter->SetInputConnection(Resample::GetPointDataBeforeResample()->GetOutputPort());
 
-    vtkNew<vtkContourFilter> contourFilter;
-    contourFilter->SetInputConnection(assignAttribute->GetOutputPort());
-    contourFilter->SetInputArrayToProcess(
-        0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, property.c_str());
-    //    contourFilter->GenerateValues(10, -1100, 1100);
-
-    contourFilter->SetValue(0, -150);
-    contourFilter->SetValue(1, 0);
-    contourFilter->SetValue(2, 200);
-    vtkNew<vtkPolyDataMapper> polyMapper;
+    // Create a color transfer function
+    vtkNew<vtkColorTransferFunction> colorTransferFunction;
+    colorTransferFunction->SetNanOpacity(1.0);
+    colorTransferFunction->SetColorSpaceToRGB();
+    colorTransferFunction->SetScaleToLinear();
+    double range[] = {-1100, 1100};
+    colorTransferFunction->AdjustRange(range);
+    colorTransferFunction->AddRGBPoint(-1100, 0., 0., 1.);
+    colorTransferFunction->AddRGBPoint(-150, 0., 1., 1.);
+    colorTransferFunction->AddRGBPoint(0, 1., 1., 1.);
+    colorTransferFunction->AddRGBPoint(150, 1., 1., 0.);
+    colorTransferFunction->AddRGBPoint(1100, 1.0, 0., 0.);
 
     vtkSmartPointer<vtkPlane> plane = vtkSmartPointer<vtkPlane>::New();
     plane->SetOrigin(0., 0., 0.);
     plane->SetNormal(0., 1.0, 0);
 
-    vtkNew<vtkLookupTable> lut;
-    lut->SetVectorMode(vtkScalarsToColors::MAGNITUDE);
-    lut->SetHueRange(.6, 1.);
-    lut->SetValueRange(1, 1);
-    lut->SetSaturationRange(.8, .8);
-
-    polyMapper->SetInputConnection(contourFilter->GetOutputPort());
+    vtkNew<vtkPolyDataMapper> polyMapper;
+    polyMapper->SetInputConnection(geometryFilter->GetOutputPort());
     polyMapper->SelectColorArray(property.c_str());
+    polyMapper->SetScalarVisibility(true);
+    polyMapper->SetScalarModeToUsePointFieldData();
+    polyMapper->SetLookupTable(colorTransferFunction);
     polyMapper->AddClippingPlane(plane);
-    polyMapper->SetLookupTable(lut);
 
     mContour->SetMapper(polyMapper);
-    mContour->GetProperty()->SetLineWidth(5);
-    mContour->VisibilityOn();
 }
 
 void Contour::ConnectToScene(vtkSmartPointer<vtkRenderer> renderer)
