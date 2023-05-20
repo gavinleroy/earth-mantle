@@ -1,68 +1,42 @@
 #include "Vorticity.h"
 
 Vorticity::Vorticity()
-    : Mantle()
+    : Resample()
     , mActor(vtkSmartPointer<vtkActor>::New())
 {
-    auto fromFile = GetCurrentStream();
-
-    // Convert the cell data to point data
-    vtkNew<vtkCellDataToPointData> cellDataToPointData;
-    cellDataToPointData->SetInputConnection(fromFile->GetOutputPort());
-
     // Compute the velocity field
     vtkNew<vtkArrayCalculator> velocityCalculator;
-    velocityCalculator->SetInputConnection(cellDataToPointData->GetOutputPort());
+    velocityCalculator->SetInputConnection(GetResampled()->GetOutputPort());
     velocityCalculator->SetResultArrayName("velocity");
     velocityCalculator->AddScalarVariable("vx", "vx");
     velocityCalculator->AddScalarVariable("vy", "vy");
     velocityCalculator->AddScalarVariable("vz", "vz");
     velocityCalculator->SetFunction("(iHat * vx + jHat * vy + kHat * vz) * 1e9");
 
-    // Compute the jacobian from the velocity field
-    vtkNew<vtkGradientFilter> gradient;
-    gradient->SetInputConnection(velocityCalculator->GetOutputPort());
-    gradient->SetFasterApproximation(true);
-    gradient->SetResultArrayName("jacobian");
-    gradient->ComputeVorticityOn();
-    gradient->SetVorticityArrayName("vorticity");
-    gradient->SetInputArrayToProcess(
+    // Detect the vortex cores
+    vtkNew<vtkVortexCore> vortexCore;
+    vortexCore->SetInputConnection(velocityCalculator->GetOutputPort());
+    vortexCore->SetInputArrayToProcess(
             0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, "velocity");
-
-    // Compute the vorticity magnitude
-    vtkNew<vtkArrayCalculator> vorticityCalculator;
-    vorticityCalculator->SetInputConnection(gradient->GetOutputPort());
-    vorticityCalculator->SetResultArrayName("vorticity magnitude");
-    vorticityCalculator->AddVectorVariable("vorticity", "vorticity");
-    vorticityCalculator->SetFunction("sqrt(dot(vorticity, vorticity))");
-
-    // Filter by the vorticity magnitude
-    vtkNew<vtkThresholdPoints> thresholdPoints;
-    thresholdPoints->SetInputConnection(vorticityCalculator->GetOutputPort());
-    thresholdPoints->SetInputArrayToProcess(
-            0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, "vorticity magnitude");
-    thresholdPoints->ThresholdBetween(0.04, 0.06);
-    vtkNew<vtkMaskPoints> maskPoints;
-    maskPoints->SetInputConnection(thresholdPoints->GetOutputPort());
-    maskPoints->SetOnRatio(1);
+    vortexCore->FasterApproximationOn();
 
     // Assign the velocity attribute
     vtkNew<vtkAssignAttribute> assignAttribute;
-    assignAttribute->SetInputConnection(vorticityCalculator->GetOutputPort());
+    assignAttribute->SetInputConnection(velocityCalculator->GetOutputPort());
     assignAttribute->Assign("velocity", vtkDataSetAttributes::VECTORS,
                             vtkAssignAttribute::POINT_DATA);
 
     // Trace the streamlines
     vtkNew<vtkStreamTracer> streamTracer;
     streamTracer->SetInputConnection(assignAttribute->GetOutputPort());
-    streamTracer->SetSourceConnection(maskPoints->GetOutputPort());
+    streamTracer->SetSourceConnection(vortexCore->GetOutputPort());
     streamTracer->SetInterpolatorType(vtkStreamTracer::INTERPOLATOR_WITH_DATASET_POINT_LOCATOR);
     streamTracer->SetIntegrationDirectionToBoth();
     streamTracer->SetIntegratorTypeToRungeKutta45();
     streamTracer->SetIntegrationStepUnit(vtkStreamTracer::CELL_LENGTH_UNIT);
     streamTracer->SetTerminalSpeed(1e-12);
     streamTracer->SetMaximumError(1e-6);
-    streamTracer->SetMaximumPropagation(5000);
+    streamTracer->SetMaximumPropagation(1000);
     streamTracer->SetMaximumNumberOfSteps(2000);
 
     // Visualize the streamlines as tubes

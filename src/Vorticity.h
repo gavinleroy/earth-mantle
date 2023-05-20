@@ -2,6 +2,7 @@
 
 #include <vtkArrayCalculator.h>
 #include <vtkGradientFilter.h>
+#include <vtkVortexCore.h>
 #include <vtkThresholdPoints.h>
 #include <vtkMaskPoints.h>
 #include <vtkAssignAttribute.h>
@@ -9,10 +10,10 @@
 #include <vtkTubeFilter.h>
 #include <vtkPolyDataMapper.h>
 
-#include "Mantle.h"
+#include "Resample.h"
 #include "Pipeline.h"
 
-class Vorticity : private MantleIO::Mantle, public Pipe::Pipeline {
+class Vorticity : private Resample::Resample, public Pipe::Pipeline {
 private:
     // Delete the copy-constructor and assignment operators
     Vorticity(const Vorticity &) = delete;
