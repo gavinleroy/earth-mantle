@@ -19,7 +19,7 @@ void Contour::ConstructInternal()
     lut->SetSaturationRange(.8, .8);
 
     contourFilter->SetInputArrayToProcess(
-            0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, property.c_str());
+        0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, property.c_str());
     //    contourFilter->GenerateValues(10, -1100, 1100);
 
     contourFilter->SetValue(0, -150);
@@ -30,6 +30,17 @@ void Contour::ConstructInternal()
     mapper->SetInputConnection(contourFilter->GetOutputPort());
     mapper->SelectColorArray(property.c_str());
     mapper->SetLookupTable(lut);
+
+    // FIXME: this shouldn't be here!
+    vtkNew<vtkPlanes>   planes;
+    vtkNew<vtkIntArray> arr;
+    arr->SetName("plane");
+    arr->InsertNextValue(0);
+    arr->InsertNextValue(1);
+    arr->InsertNextValue(0);
+    planes->SetNormals(arr);
+
+    mapper->SetClippingPlanes(planes);
 }
 
 void Contour::SetInputConnection(std::shared_ptr<Pipe::AllInput> pipelines)

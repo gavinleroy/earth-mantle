@@ -62,7 +62,7 @@ namespace Geometry {
     //      3. If we need multiple active visualizations at a time we'll need a way
     //         to orchestrate the cutting planes so that the geometry looks like one.
     class Geometry {
-    private:
+    public:
         vtkSmartPointer<vtkSphereSource> core;
         vtkSmartPointer<vtkSphereSource> hull;
         // TODO: how they hell can we get the wedge view?
@@ -72,7 +72,6 @@ namespace Geometry {
         vtkSmartPointer<vtkActor> coreActor;
         vtkSmartPointer<vtkActor> hullActor;
 
-    public:
         Geometry();
 
         void SetActiveMapper(std::shared_ptr<Pipe::ActorMapped> mapper);

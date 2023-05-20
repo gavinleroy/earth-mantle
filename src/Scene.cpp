@@ -11,13 +11,17 @@ Scene::Scene()
     inputPipelines = std::make_shared<Pipe::AllInput>();
 
     // Initialize earth mappings
-    currentEarthMapper = EarthView::LIC;
+    currentEarthMapper = EarthView::Contour;
     earthMappers       = EarthMappings({
         {
             EarthView::LIC,
             std::make_shared<LIConvolution>(  // velocityCalculator->GetOutputPort()
                 ),
-        }
+        },
+        {
+            EarthView::Contour,
+            std::make_shared<Contour>(),
+        },
         // TODO: add the rest of the mappings
     });
 
@@ -34,17 +38,17 @@ void Scene::InitRenderer(vtkSmartPointer<vtkRenderer> renderer)
     // TODO: lights sources, camera, etc.
     this->renderer = renderer;
 
-    this->geometry->ConnectToScene(this->renderer);
+    // this->geometry->ConnectToScene(this->renderer);
 
-    //     if (this->currentEarthMapper.has_value())
-    //         SetMapping(this->currentEarthMapper.value());
-    //     else {
-    // #ifndef NDEBUG
-    //         std::cout << "SCENE: No active mapping set" << std::endl;
-    // #else
-    //         ;
-    // #endif
-    //     }
+    if (this->currentEarthMapper.has_value())
+        SetMapping(this->currentEarthMapper.value());
+    else {
+#ifndef NDEBUG
+        std::cout << "SCENE: No active mapping set" << std::endl;
+#else
+        ;
+#endif
+    }
 }
 
 void Scene::SetMapping(EarthView idx)
