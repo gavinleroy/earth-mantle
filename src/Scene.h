@@ -16,6 +16,7 @@
 #include "Pipeline.h"
 #include "Contour.h"
 #include "IsoVolume.h"
+#include "ScalarField.h"
 
 class Scene {
 private:
@@ -26,7 +27,7 @@ private:
         * 1: Tube
         * 2: Volumes
     */
-    std::unique_ptr<Pipe::Pipeline> pipelines[5];
+    std::unique_ptr<Pipe::Pipeline> pipelines[6];
     vtkSmartPointer<vtkRenderer> renderer;
 
 public:
