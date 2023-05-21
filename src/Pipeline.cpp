@@ -92,6 +92,12 @@ namespace Pipe {
         core         = vtkSmartPointer<vtkSphereSource>::New();
         hull         = vtkSmartPointer<vtkSphereSource>::New();
 
+        // Geometry parameters
+        int    resolution  = 1000;
+        double outerRadius = 6377;
+        double innerRadius = 3486;
+        double cx = 0, cy = 0, cz = 0;
+        double nx = 0, ny = 1, nz = 0;
         MantleIO::MantleAttr tempAnom = MantleIO::MantleAttr::TempAnom;
 
         // Create a color transfer function

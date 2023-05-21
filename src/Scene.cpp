@@ -14,7 +14,7 @@ Scene::Scene()
 #endif
 
     // Initialize earth mappings
-    currentEarthMapper = EarthView::LIC;
+    currentEarthMapper = EarthView::Contour;
     earthMappers       = EarthMappings({
         {
             EarthView::LIC,
