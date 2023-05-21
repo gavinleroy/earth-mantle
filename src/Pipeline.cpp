@@ -90,7 +90,7 @@ namespace Pipe {
         MantleIO::MantleAttr tempAnom = MantleIO::MantleAttr::TempAnom;
 
         // Geometry parameters
-        int    resolution  = 200;
+        int    resolution  = 1000;
         double outerRadius = 6377;
         double innerRadius = 3486;
         double cx = 0, cy = 0, cz = 0;

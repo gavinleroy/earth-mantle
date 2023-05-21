@@ -6,6 +6,7 @@
 #include <vtkContourFilter.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkIntArray.h>
+#include <vtkMaskPoints.h>
 
 #include "Pipeline.h"
 
@@ -16,6 +17,7 @@ private:
 
     vtkSmartPointer<vtkContourFilter>  contourFilter;
     vtkSmartPointer<vtkPolyDataMapper> mapper;
+    vtkSmartPointer<vtkMaskPoints> mask;
 
     void ConstructInternal();
 
