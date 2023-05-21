@@ -57,7 +57,7 @@ void Volumes::ConstructInternal()
     volumeProperty->SetColor(colorTransferFunction);
     volumeProperty->SetScalarOpacity(opacityTransferFunction);
 
-    vtkSmartPointer<vtkPlane> plane = vtkSmartPointer<vtkPlane>::New();
+    vtkNew<vtkPlane> plane;
     plane->SetOrigin(0., 0., 0.);
     plane->SetNormal(0., 1.0, 0);
 
