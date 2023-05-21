@@ -48,6 +48,58 @@
 #include <vtkLookupTable.h>
 #include <vtkAlgorithm.h>
 #include <vtkArrayCalculator.h>
+#include <vtkPointInterpolator.h>
+#include <vtkSphereSource.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkActor.h>
+#include <vtkProperty.h>
+#include <vtkTexture.h>
+#include <vtkRenderer.h>
+#include <vtkNetCDFCFReader.h>
+#include <vtkNetCDFReader.h>
+#include <vtkPiecewiseFunction.h>
+#include <vtkColorTransferFunction.h>
+#include <vtkVolumeProperty.h>
+#include <vtkDataArraySelection.h>
+#include <vtkAssignAttribute.h>
+#include <vtkSmartVolumeMapper.h>
+#include <vtkVolumeMapper.h>
+#include <vtkVolume.h>
+#include <vtkStructuredGrid.h>
+#include <vtkResampleToImage.h>
+#include <vtkDataArrayCollection.h>
+#include <vtkImageData.h>
+#include <vtkPointData.h>
+#include <vtkDoubleArray.h>
+#include <vtkDataSetMapper.h>
+#include <vtkLookupTable.h>
+#include <vtkStringArray.h>
+#include <vtkAssignAttribute.h>
+#include <vtkCellData.h>
+#include <vtkStructuredGrid.h>
+#include <vtkPlane.h>
+#include <vtkCutter.h>
+#include <vtkClipVolume.h>
+#include <vtkClipDataSet.h>
+#include <vtkStructuredGridGeometryFilter.h>
+#include <vtkPolyData.h>
+#include <vtkRectilinearGrid.h>
+#include <vtkCellDataToPointData.h>
+#include <vtkFloatArray.h>
+#include <vtkFixedPointVolumeRayCastMapper.h>
+#include <vtkPlanes.h>
+#include <vtkTubeFilter.h>
+#include <vtkMarchingCubes.h>
+#include <vtkImageDataGeometryFilter.h>
+#include <vtkScalarsToColors.h>
+#include <vtkLookupTable.h>
+#include <vtkAlgorithm.h>
+#include <vtkSphereSource.h>
+#include <vtkClipPolyData.h>
+#include <vtkDiskSource.h>
+#include <vtkAppendPolyData.h>
+#include <vtkGaussianKernel.h>
+#include <vtkPointInterpolator.h>
 
 #include <sstream>
 
@@ -352,6 +404,27 @@ namespace Pipe {
     };
 
 
+    class Geometry : public Pipe::OutputPipeline {
+    public:
+        vtkSmartPointer<vtkSphereSource> core;
+        vtkSmartPointer<vtkSphereSource> hull;
+        // TODO: how they hell can we get the wedge view?
+        //       This would be something with 3 cutting planes iirc.
+        vtkSmartPointer<vtkPlane> cuttingPlane;
+
+        vtkSmartPointer<vtkActor> coreActor;
+        vtkSmartPointer<vtkActor> hullActor;
+
+        vtkSmartPointer<vtkPointInterpolator> pointInterpolator;
+
+        Geometry();
+
+        void SetInputConnection(vtkAlgorithmOutput *cin);
+
+        vtkAlgorithmOutput *GetOutputPort();
+    };
+
+
     // -------------------------------------------
 
     struct AllInput {
@@ -361,6 +434,7 @@ namespace Pipe {
         std::shared_ptr<VelocityCalculator> imageVelocityCalculator;
         std::shared_ptr<VelocityCalculator> otherVelocityCalculator;
         std::shared_ptr<TempAnomAttribute>  assignAttr;
+        std::shared_ptr<Geometry>           geometry;
 
         AllInput()
         {
@@ -370,6 +444,7 @@ namespace Pipe {
             imageVelocityCalculator = std::make_shared<VelocityCalculator>();
             otherVelocityCalculator = std::make_shared<VelocityCalculator>();
             assignAttr              = std::make_shared<TempAnomAttribute>();
+            geometry                = std::make_shared<Geometry>();
 
             // NOTE: this is super fragile!
             //       Be very careful during initialization.
@@ -388,6 +463,9 @@ namespace Pipe {
 
             // mantle -> resampled -> attribute assigned
             assignAttr->SetInputConnection(resampled->GetOutputPort());
+
+            // mantle -> cell to point -> velocity
+            geometry->SetInputConnection(otherVelocityCalculator->GetOutputPort());
         }
     };
 }

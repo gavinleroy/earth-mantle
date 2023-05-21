@@ -16,7 +16,6 @@
 #include "Pipeline.h"
 #include "Contour.h"
 #include "IsoVolume.h"
-#include "Geometry.h"
 
 // TODO: add everything else
 enum class EarthView {
@@ -32,20 +31,19 @@ enum class VolumeView {
     // ...
 };
 
-using EarthMappings  = std::unordered_map<EarthView, std::shared_ptr<Pipe::ActorMapped>>;
+using EarthMappings = std::unordered_map<EarthView, std::shared_ptr<Pipe::ActorMapped>>;
 using VolumeMappings = std::unordered_map<VolumeView, std::shared_ptr<Pipe::VolumeMapped>>;
 
 class Scene {
 private:
-    Scene(const Scene &) = delete;           // Delete the copy-constructor.
+    Scene(const Scene &)          = delete;  // Delete the copy-constructor.
     void operator=(const Scene &) = delete;  // Delete the assignment operator.
 
     // The current shown mappings (if any)
     std::optional<EarthView>  currentEarthMapper;
     std::optional<VolumeView> currentEarthVolume;
 
-    std::shared_ptr<Pipe::AllInput>     inputPipelines;
-    std::unique_ptr<Geometry::Geometry> geometry;
+    std::shared_ptr<Pipe::AllInput> inputPipelines;
 
     EarthMappings                earthMappers;
     VolumeMappings               earthVolumes;

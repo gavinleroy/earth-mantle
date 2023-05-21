@@ -7,7 +7,6 @@ Scene::Scene()
 #ifndef NDEBUG
     std::cout << "SCENE: Initializing new scene" << std::endl;
 #endif
-    geometry       = std::make_unique<Geometry::Geometry>();
     inputPipelines = std::make_shared<Pipe::AllInput>();
 
 #ifndef NDEBUG
@@ -15,7 +14,7 @@ Scene::Scene()
 #endif
 
     // Initialize earth mappings
-    currentEarthMapper = {};
+    currentEarthMapper = EarthView::LIC;
     earthMappers       = EarthMappings({
         {
             EarthView::LIC,
@@ -32,7 +31,7 @@ Scene::Scene()
     std::cout << "SCENE: building new volumes" << std::endl;
 #endif
 
-    currentEarthVolume = VolumeView::Volume;
+    currentEarthVolume = {};
     earthVolumes       = VolumeMappings({
         {
             VolumeView::Volume,
@@ -57,8 +56,6 @@ void Scene::InitRenderer(vtkSmartPointer<vtkRenderer> renderer)
 
     // TODO: lights sources, camera, etc.
     this->renderer = renderer;
-
-    // this->geometry->ConnectToScene(this->renderer);
 
     if (this->currentEarthVolume.has_value())
         SetVolume(this->currentEarthVolume.value());
@@ -85,8 +82,6 @@ void Scene::SetMapping(EarthView idx)
     vtkNew<vtkActor> act;
     mapper->ConnectToActor(act);
     renderer->AddActor(act);
-
-    this->geometry->SetActiveMapper(mapper);
 }
 
 void Scene::SetVolume(VolumeView idx)
