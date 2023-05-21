@@ -95,73 +95,49 @@ void Scene::SetVolume(VolumeView idx)
 }
 
 void Scene::InitUI(vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor)
-{
-    // print avilable assignAttribute options
-    std::cout << "Available assignAttribute options:" << std::endl;
-    // std::cout << "l: switch to LIConvolution pipeline" << std::endl;
-    // std::cout << "t: switch to Tube pipeline" << std::endl;
-    // std::cout << "v: switch to Volumes pipeline" << std::endl;
-    // std::cout << "c: switch to Contour pipeline" << std::endl;
-    // std::cout << "i: switch to IsoVolumes pipeline" << std::endl;
-    // std::cout << "w: toggle wireframe" << std::endl;
-    // std::cout << "s: step forward" << std::endl;
-    // std::cout << "b: step backward" << std::endl;
+{   
+    std::cout << "Switch between mappings:" << std::endl;
+    std::cout << "c: Contour" << std::endl << std::endl;
+    std::cout << "l: LIConvolution" << std::endl;
+
+    std::cout << "Toggle volume views:" << std::endl;
+    std::cout << "v: Volumes" << std::endl;
+    std::cout << "i: IsoVolumes" << std::endl;
+    std::cout << "t: Tubes" << std::endl << std::endl;
 }
 
-void Scene::ProcessInput(char *input)
+void Scene::ProcessInput(std::string input)
 {
-    // TODO: only render one pipeline at a time
-    std::cout << "Input: " << input << std::endl;
-    if (strcmp(input, "l") == 0)
-        SwitchPipeline(0);
-    if (strcmp(input, "t") == 0)
-        SwitchPipeline(1);
-    if (strcmp(input, "v") == 0)
-        SwitchPipeline(2);
-    if (strcmp(input, "c") == 0)
-        SwitchPipeline(3);
-    if (strcmp(input, "i") == 0)
-        SwitchPipeline(4);
+    if (input.compare("c") == 0) SwitchMapping(EarthView::Contour);
+    // CRASHES IF PRESSED TWICE
+    if (input.compare("l") == 0) SwitchMapping(EarthView::LIC);
 
-    std::cout << "Ignoring for now >:)" << std::endl;
+    if (input.compare("v") == 0) ToggleVolume(VolumeView::Volume);
+    if (input.compare("i") == 0) ToggleVolume(VolumeView::IsoVolume);
+    if (input.compare("t") == 0) ToggleVolume(VolumeView::Tubes);
 
-    // add more controls here if needed ... (yes, pls)
+    if (input.compare("a") == 0) {
+        int nrOfActors = renderer->GetActors()->GetNumberOfItems();
+        std::cout << "Number of actors: " << nrOfActors << std::endl;
+    }
 }
 
-void Scene::SwitchPipeline(int index)
+void Scene::SwitchMapping(EarthView idx)
 {
-    // // remove old pipeline
-    // for (const auto &pipeline : pipelines) {
-    //     if (pipeline != nullptr) {
-    //         std::cout << "Remove pipeline from Scene." << std::endl;
-    //         pipeline->RemoveFromScene(this->renderer);
-    //     }
-    // }
+#ifndef NDEBUG
+    std::cout << "SCENE: Switching mapping" << std::endl;
+#endif
+    renderer->RemoveAllViewProps();
+    SetMapping(idx);
+}
 
-    // if (pipelines[index] == nullptr) {
-    //     switch (index) {
-    //     case 0:
-    //         pipelines[0] = std::make_unique<LIConvolution>();
-    //         break;
-    //     case 1:
-    //         pipelines[1] = std::make_unique<Tube>();
-    //         break;
-    //     case 2:
-    //         pipelines[2] = std::move(std::make_unique<Volumes>());
-    //         break;
-    //     case 3:
-    //         pipelines[3] = std::make_unique<Contour>();
-    //         break;
-    //     case 4:
-    //         pipelines[4] = std::make_unique<IsoVolume>();
-    //         break;
-    //     default:
-    //         std::cout << "Invalid pipeline index." << std::endl;
-    //         return;
-    //     }
-    // }
-    // std::cout << "Connect pipeline to Scene." << std::endl;
-    // pipelines[index]->ConnectToScene(this->renderer);
+void Scene::ToggleVolume(VolumeView idx)
+{
+#ifndef NDEBUG
+    std::cout << "SCENE: Toggling volume" << std::endl;
+#endif
+
+    SetVolume(idx);
 }
 
 void Scene::Update(double dt, double t)

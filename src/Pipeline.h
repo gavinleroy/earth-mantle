@@ -102,6 +102,8 @@
 #include <vtkPointInterpolator.h>
 
 #include <sstream>
+#include <optional>
+#include <filesystem>
 
 // Forward decls
 namespace Pipe {

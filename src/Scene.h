@@ -42,6 +42,7 @@ private:
     // The current shown mappings (if any)
     std::optional<EarthView>  currentEarthMapper;
     std::optional<VolumeView> currentEarthVolume;
+    std::vector<VolumeView> currentEarthVolumes;
 
     std::shared_ptr<Pipe::AllInput> inputPipelines;
 
@@ -51,12 +52,13 @@ private:
 
     void SetMapping(EarthView idx);
     void SetVolume(VolumeView idx);
+    void SwitchMapping(EarthView idx);
+    void ToggleVolume(VolumeView idx);
 
 public:
     Scene();
     void InitRenderer(vtkSmartPointer<vtkRenderer> renderer);
     void InitUI(vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor);
-    void ProcessInput(char *input);
-    void SwitchPipeline(int index);
+    void ProcessInput(std::string input);
     void Update(double dt, double t);
 };
