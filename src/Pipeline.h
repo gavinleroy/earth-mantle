@@ -100,6 +100,7 @@
 #include <vtkAppendPolyData.h>
 #include <vtkGaussianKernel.h>
 #include <vtkPointInterpolator.h>
+#include <vtkBox.h>
 
 #include <sstream>
 #include <optional>

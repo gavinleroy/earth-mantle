@@ -117,6 +117,9 @@ namespace Pipe {
         cuttingPlane->SetOrigin(cx, cy, cz);
         cuttingPlane->SetNormal(nx, ny, nz);
 
+        vtkNew<vtkBox> cuttingBox;
+        cuttingBox->SetBounds(-7000, 7000, -7000, 0, 0, 7000);
+
         // Initialize the hull
         hull->SetCenter(cx, cy, cz);
         hull->SetRadius(outerRadius);
@@ -126,7 +129,7 @@ namespace Pipe {
         // Clip the hull
         vtkNew<vtkClipPolyData> hullClipper;
         hullClipper->SetInputConnection(hull->GetOutputPort());
-        hullClipper->SetClipFunction(cuttingPlane);
+        hullClipper->SetClipFunction(cuttingBox);
         hullClipper->GenerateClipScalarsOn();
 
         // Initialize the core
@@ -135,26 +138,39 @@ namespace Pipe {
         core->SetThetaResolution(resolution);
         core->SetPhiResolution(resolution);
 
-        // Clip the core
-        vtkNew<vtkClipPolyData> coreClipper;
-        coreClipper->SetInputConnection(core->GetOutputPort());
-        coreClipper->SetClipFunction(cuttingPlane);
-        coreClipper->GenerateClipScalarsOn();
-        coreClipper->SetInsideOut(true);
+        // Initialize the slices
+        vtkNew<vtkDiskSource> slice1, slice2;
+        slice1->SetCenter(cx, cy, cz);
+        slice1->SetNormal(0, 1, 0);
+        slice1->SetInnerRadius(innerRadius);
+        slice1->SetOuterRadius(outerRadius);
+        slice1->SetCircumferentialResolution(resolution);
+        slice1->SetRadialResolution(resolution);
 
-        // Initialize the disk
-        vtkNew<vtkDiskSource> slice;
-        slice->SetCenter(cx, cy, cz);
-        slice->SetNormal(nx, ny, nz);
-        slice->SetInnerRadius(innerRadius);
-        slice->SetOuterRadius(outerRadius);
-        slice->SetCircumferentialResolution(resolution);
-        slice->SetRadialResolution(resolution);
+        slice2->SetCenter(cx, cy, cz);
+        slice2->SetNormal(0, 0, 1);
+        slice2->SetInnerRadius(innerRadius);
+        slice2->SetOuterRadius(outerRadius);
+        slice2->SetCircumferentialResolution(resolution);
+        slice2->SetRadialResolution(resolution);
 
+        // Append the core and slices
+        vtkNew<vtkAppendPolyData> coreAndSlices;
+        coreAndSlices->AddInputConnection(core->GetOutputPort());
+        coreAndSlices->AddInputConnection(slice1->GetOutputPort());
+        coreAndSlices->AddInputConnection(slice2->GetOutputPort());
+
+        // Clip the core and slices
+        vtkNew<vtkClipPolyData> coreAndSlicesClipper;
+        coreAndSlicesClipper->SetInputConnection(coreAndSlices->GetOutputPort());
+        coreAndSlicesClipper->SetClipFunction(cuttingBox);
+        coreAndSlicesClipper->GenerateClipScalarsOn();
+        coreAndSlicesClipper->SetInsideOut(true);
+
+        // Append the hull, core, and slices
         vtkNew<vtkAppendPolyData> appendPolyData;
         appendPolyData->AddInputConnection(hullClipper->GetOutputPort());
-        appendPolyData->AddInputConnection(coreClipper->GetOutputPort());
-        appendPolyData->AddInputConnection(slice->GetOutputPort());
+        appendPolyData->AddInputConnection(coreAndSlicesClipper->GetOutputPort());
 
         // Gaussian kernel
         vtkNew<vtkGaussianKernel> gaussianKernel;
@@ -163,7 +179,6 @@ namespace Pipe {
 
         // Point interpolator
         pointInterpolator = vtkSmartPointer<vtkPointInterpolator>::New();
-        // pointInterpolator->SetSourceConnection(data->GetOutputPort());
         pointInterpolator->SetInputConnection(appendPolyData->GetOutputPort());
         pointInterpolator->SetKernel(gaussianKernel);
     }
