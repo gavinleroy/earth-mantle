@@ -17,8 +17,8 @@ private:
     vtkSmartPointer<vtkMarchingCubes> isosurface;
     vtkSmartPointer<vtkActor>         mActor;
 
-    uint32_t numContours = 4;
-    int32_t  lowerBound = 400, upperBound = 1100;
+    uint32_t numContours = 50;
+    int32_t  lowerBound = 200, upperBound = 1100;
 
     void ConstructInternal();
 

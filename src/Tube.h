@@ -57,11 +57,14 @@
 
 class Tube : public Pipe::VolumeMapped {
 private:
-    Tube(const Tube &) = delete;            // Delete the copy-constructor.
+    Tube(const Tube &)           = delete;  // Delete the copy-constructor.
     void operator=(const Tube &) = delete;  // Delete the assignment operator.
 
-    vtkSmartPointer<vtkCellDataToPointData> cellToPoint;
-    vtkSmartPointer<vtkActor>               streamlineActor;
+    // vtkSmartPointer<vtkCellDataToPointData> cellToPoint;
+
+    vtkSmartPointer<vtkThresholdPoints> thresholdFilter;
+    vtkSmartPointer<vtkAssignAttribute> assignAttribute;
+    vtkSmartPointer<vtkActor>           streamlineActor;
 
     void ConstructInternal();
 
