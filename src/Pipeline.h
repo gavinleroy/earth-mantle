@@ -106,7 +106,7 @@
 // Forward decls
 namespace Pipe {
 
-    inline const uint32_t SAMPLING_DIM = 200;
+    inline const uint32_t SAMPLING_DIM = 100;
 
     struct AllInput;
     class Resample;
@@ -406,18 +406,25 @@ namespace Pipe {
 
     class Geometry : public Pipe::OutputPipeline {
     public:
-        vtkSmartPointer<vtkSphereSource> core;
-        vtkSmartPointer<vtkSphereSource> hull;
-        // TODO: how they hell can we get the wedge view?
-        //       This would be something with 3 cutting planes iirc.
-        vtkSmartPointer<vtkPlane> cuttingPlane;
-
+        // I don't think we need these
         vtkSmartPointer<vtkActor> coreActor;
         vtkSmartPointer<vtkActor> hullActor;
 
+        // Tweaking geometry visuals
+        uint32_t resolution  = 200;
+        double   outerRadius = 6377;
+        double   innerRadius = 3486;
+        double   cx = 0, cy = 0, cz = 0;
+        double   nx = 0, ny = 1, nz = 0;
+
+        vtkSmartPointer<vtkSphereSource>      core;
+        vtkSmartPointer<vtkSphereSource>      hull;
+        vtkSmartPointer<vtkPlane>             cuttingPlane;
         vtkSmartPointer<vtkPointInterpolator> pointInterpolator;
 
         Geometry();
+
+        void IncreaseInnerRadius();
 
         void SetInputConnection(vtkAlgorithmOutput *cin);
 

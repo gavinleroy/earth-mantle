@@ -166,5 +166,6 @@ void Scene::SwitchPipeline(int index)
 
 void Scene::Update(double dt, double t)
 {
+    // inputPipelines->geometry->IncreaseInnerRadius();
     // TODO
 }

@@ -56,7 +56,7 @@ void LIConvolution::ConstructInternal()
 
     // mapper->SetInputConnection(geometry->GetOutputPort());
     mapper->SetInputArrayToProcess(0, 0, 0, vtkDataObject::POINT, "velocity");
-    mapper->GetLICInterface()->SetEnhancedLIC(1);  // Disable enhanced LIC (for now)
+    mapper->GetLICInterface()->SetEnhancedLIC(0);  // Disable enhanced LIC (for now)
 
     mapper->SelectColorArray("velocity");
     mapper->SetScalarVisibility(true);
@@ -71,8 +71,6 @@ void LIConvolution::SetInputConnection(std::shared_ptr<Pipe::AllInput> pipelines
 #endif
 
     mapper->SetInputConnection(pipelines->geometry->GetOutputPort());
-    // this->geometry->SetInputConnection(
-    //     pipelines->imageVelocityCalculator->GetOutputPort());
 }
 
 void LIConvolution::ConnectToActor(vtkSmartPointer<vtkActor> actor)
