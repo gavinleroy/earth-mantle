@@ -14,7 +14,7 @@ Scene::Scene()
 #endif
 
     // Initialize earth mappings
-    currentEarthMapper = EarthView::Contour;
+    currentEarthMapper = {};
     earthMappers       = EarthMappings({
         {
             EarthView::LIC,
@@ -24,7 +24,6 @@ Scene::Scene()
             EarthView::Contour,
             std::make_shared<Contour>(),
         },
-        // TODO: add the rest of the mappings
     });
 
 #ifndef NDEBUG
@@ -36,6 +35,14 @@ Scene::Scene()
         {
             VolumeView::Volume,
             std::make_shared<Volumes>(),
+        },
+        {
+            VolumeView::Slabs,
+            std::make_shared<Slabs>(),
+        },
+        {
+            VolumeView::Plumes,
+            std::make_shared<Plumes>(),
         },
         {
             VolumeView::IsoVolume,
@@ -95,26 +102,39 @@ void Scene::SetVolume(VolumeView idx)
 }
 
 void Scene::InitUI(vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor)
-{   
-    std::cout << std::endl << "Switch between mappings:" << std::endl;
-    std::cout << "c: Contour" << std::endl;
-    std::cout << "l: LIConvolution (don't press twice)" << std::endl;
+{
+    std::cout << std::endl
+              << "Switch between mappings:" << std::endl
+              << "c: Contour" << std::endl
+              << "l: LIConvolution (don't press twice)" << std::endl;
 
-    std::cout << std::endl << "Toggle volume views:" << std::endl;
-    std::cout << "v: Volumes" << std::endl;
-    std::cout << "i: IsoVolumes" << std::endl;
-    std::cout << "t: Tubes" << std::endl;
+    std::cout << std::endl
+              << "Toggle volume views:" << std::endl
+              << "v: Volumes" << std::endl
+              << "s: Cold slabs" << std::endl
+              << "p: Hot plumes" << std::endl
+              << "i: IsoVolumes" << std::endl
+              << "t: Tubes" << std::endl;
 }
 
 void Scene::ProcessInput(std::string input)
 {
-    // Warning: CRASHES IF "l" is PRESSED TWICE (segfault)
-    if (input.compare("c") == 0) SwitchMapping(EarthView::Contour);
-    if (input.compare("l") == 0) SwitchMapping(EarthView::LIC);
+    // FIXME: CRASHES IF "l" is PRESSED TWICE (segfault)
+    if (input.compare("c") == 0)
+        SwitchMapping(EarthView::Contour);
+    if (input.compare("l") == 0)
+        SwitchMapping(EarthView::LIC);
 
-    if (input.compare("v") == 0) ToggleVolume(VolumeView::Volume);
-    if (input.compare("i") == 0) ToggleVolume(VolumeView::IsoVolume);
-    if (input.compare("t") == 0) ToggleVolume(VolumeView::Tubes);
+    if (input.compare("v") == 0)
+        ToggleVolume(VolumeView::Volume);
+    if (input.compare("s") == 0)
+        ToggleVolume(VolumeView::Slabs);
+    if (input.compare("p") == 0)
+        ToggleVolume(VolumeView::Plumes);
+    if (input.compare("i") == 0)
+        ToggleVolume(VolumeView::IsoVolume);
+    if (input.compare("t") == 0)
+        ToggleVolume(VolumeView::Tubes);
 
     if (input.compare("a") == 0) {
         int nrOfActors = renderer->GetActors()->GetNumberOfItems();
@@ -140,13 +160,14 @@ void Scene::ToggleVolume(VolumeView idx)
     std::cout << "SCENE: Toggling volume" << std::endl;
 #endif
     std::vector<VolumeView> remainingEarthVolumes;
-    std::remove_copy(this->currentEarthVolumes.begin(),this->currentEarthVolumes.end(), std::back_inserter(remainingEarthVolumes), idx);
+    std::remove_copy(this->currentEarthVolumes.begin(), this->currentEarthVolumes.end(),
+                     std::back_inserter(remainingEarthVolumes), idx);
     if (remainingEarthVolumes.size() == this->currentEarthVolumes.size()) {
         remainingEarthVolumes.push_back(idx);
         SetVolume(idx);
-    } else {
+    } else
         this->earthVolumes[idx]->RemoveFromScene(this->renderer);
-    }
+
     this->currentEarthVolumes = remainingEarthVolumes;
 }
 

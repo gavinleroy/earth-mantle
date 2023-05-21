@@ -15,6 +15,8 @@
 #include "LIConvolution.h"
 #include "Pipeline.h"
 #include "Contour.h"
+#include "Plumes.h"
+#include "Slabs.h"
 #include "IsoVolume.h"
 
 // TODO: add everything else
@@ -26,8 +28,10 @@ enum class EarthView {
 // TODO: add everything else
 enum class VolumeView {
     Volume = 0,
-    IsoVolume,
+    Slabs,
+    Plumes,
     Tubes,
+    IsoVolume,
     // ...
 };
 
@@ -42,7 +46,8 @@ private:
     // The current shown mappings (if any)
     std::optional<EarthView>  currentEarthMapper;
     std::optional<VolumeView> currentEarthVolume;
-    std::vector<VolumeView> currentEarthVolumes;
+    std::vector<VolumeView>   currentEarthVolumes;
+    vtkSmartPointer<vtkActor> earthActor;
 
     std::shared_ptr<Pipe::AllInput> inputPipelines;
 
@@ -50,8 +55,8 @@ private:
     VolumeMappings               earthVolumes;
     vtkSmartPointer<vtkRenderer> renderer;
 
-    void SetMapping(EarthView idx);
     void SetVolume(VolumeView idx);
+    void SetMapping(EarthView idx);
     void SwitchMapping(EarthView idx);
     void ToggleVolume(VolumeView idx);
 

@@ -35,10 +35,11 @@ void IsoVolume::ConstructInternal()
     volumeRayMapper->SetUseJittering(true);
 
     vtkNew<vtkVolumeProperty> volumeProperty;
-    volumeProperty->SetInterpolationTypeToLinear();
-    volumeProperty->ShadeOn();
     volumeProperty->SetColor(colorTransferFunction);
     volumeProperty->SetScalarOpacity(opacityTransferFunction);
+    volumeProperty->ShadeOn();
+
+    volumeProperty->SetInterpolationTypeToLinear();
     volumeProperty->SetAmbient(.3);
     volumeProperty->SetDiffuse(.75);
     volumeProperty->SetSpecular(.5);

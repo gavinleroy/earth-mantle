@@ -9,19 +9,23 @@
 
 #include "Pipeline.h"
 
-class IsoVolume : public Pipe::VolumeMapped {
+class Slabs : public Pipe::VolumeMapped {
 private:
-    IsoVolume(const IsoVolume &)      = delete;
-    void operator=(const IsoVolume &) = delete;
+    Slabs(const Slabs &)          = delete;
+    void operator=(const Slabs &) = delete;
 
-    vtkSmartPointer<vtkGPUVolumeRayCastMapper> volumeRayMapper;
-    vtkSmartPointer<vtkVolume>                 mVolume;
+    vtkSmartPointer<vtkMarchingCubes> isosurface;
+    vtkSmartPointer<vtkActor>         mActor;
+
+    uint32_t numContours = 4;
+    int32_t  lowerBound = -1100, upperBound = -200;
 
     void ConstructInternal();
 
 public:
-    IsoVolume();
+    Slabs();
 
+    void SetUpperBound(int32_t ub);
     void SetInputConnection(std::shared_ptr<Pipe::AllInput> pipelines);
     void ConnectToScene(vtkSmartPointer<vtkRenderer> renderer);
     void RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer);
