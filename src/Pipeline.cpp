@@ -87,20 +87,19 @@ namespace Pipe {
 
     Geometry::Geometry()
     {
-        MantleIO::MantleAttr tempAnom = MantleIO::MantleAttr::TempAnom;
+        // Initialize fields
+        cuttingPlane = vtkSmartPointer<vtkPlane>::New();
+        core         = vtkSmartPointer<vtkSphereSource>::New();
+        hull         = vtkSmartPointer<vtkSphereSource>::New();
 
-        // Geometry parameters
-        int    resolution  = 200;
-        double outerRadius = 6377;
-        double innerRadius = 3486;
-        double cx = 0, cy = 0, cz = 0;
-        double nx = 0, ny = 1, nz = 0;
+        MantleIO::MantleAttr tempAnom = MantleIO::MantleAttr::TempAnom;
 
         // Create a color transfer function
         vtkNew<vtkColorTransferFunction> colorTransferFunction;
+        double                           range[] = { -1100., 1100. };
+
         colorTransferFunction->SetColorSpaceToRGB();
         colorTransferFunction->SetScaleToLinear();
-        double range[] = { -1100., 1100. };
         colorTransferFunction->AdjustRange(range);
         colorTransferFunction->AddRGBPoint(-1100, 0., 0., 1.);
         colorTransferFunction->AddRGBPoint(-150, 0., 1., 1.);
@@ -108,14 +107,11 @@ namespace Pipe {
         colorTransferFunction->AddRGBPoint(150, 1., 1., 0.);
         colorTransferFunction->AddRGBPoint(1100, 1.0, 0., 0.);
 
-
         // Initialize the cutting plane
-        vtkNew<vtkPlane> cuttingPlane;
         cuttingPlane->SetOrigin(cx, cy, cz);
         cuttingPlane->SetNormal(nx, ny, nz);
 
         // Initialize the hull
-        vtkNew<vtkSphereSource> hull;
         hull->SetCenter(cx, cy, cz);
         hull->SetRadius(outerRadius);
         hull->SetThetaResolution(resolution);
@@ -128,7 +124,6 @@ namespace Pipe {
         hullClipper->GenerateClipScalarsOn();
 
         // Initialize the core
-        vtkNew<vtkSphereSource> core;
         core->SetCenter(cx, cy, cz);
         core->SetRadius(innerRadius);
         core->SetThetaResolution(resolution);
@@ -154,8 +149,6 @@ namespace Pipe {
         appendPolyData->AddInputConnection(hullClipper->GetOutputPort());
         appendPolyData->AddInputConnection(coreClipper->GetOutputPort());
         appendPolyData->AddInputConnection(slice->GetOutputPort());
-        // appendPolyData->AddInputConnection(planeSource->GetOutputPort());
-        // appendPolyData->AddInputConnection(coreSource->GetOutputPort());
 
         // Gaussian kernel
         vtkNew<vtkGaussianKernel> gaussianKernel;
@@ -167,17 +160,12 @@ namespace Pipe {
         // pointInterpolator->SetSourceConnection(data->GetOutputPort());
         pointInterpolator->SetInputConnection(appendPolyData->GetOutputPort());
         pointInterpolator->SetKernel(gaussianKernel);
+    }
 
-        // pointInterpolator->GetOutputPort()
-
-        // Map the poly data
-        // vtkNew<vtkPolyDataMapper> polyDataMapper;
-        // polyDataMapper->SetInputConnection(pointInterpolator->GetOutputPort());
-        // polyDataMapper->SetScalarVisibility(true);
-        // polyDataMapper->SelectColorArray(tempAnom.c_str());
-        // polyDataMapper->SetScalarModeToUsePointFieldData();
-        // polyDataMapper->SetLookupTable(colorTransferFunction);
-        // mActor->SetMapper(polyDataMapper);
+    void Geometry::IncreaseInnerRadius()
+    {
+        innerRadius += 100;
+        core->SetRadius(innerRadius);
     }
 
     void Geometry::SetInputConnection(vtkAlgorithmOutput *cin)
