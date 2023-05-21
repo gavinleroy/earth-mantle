@@ -13,6 +13,7 @@
 #include <vtkLODActor.h>
 #include <vtkSphereSource.h>
 #include <vtkImplicitSelectionLoop.h>
+#include <vtkNamedColors.h>
 
 #include "Scene.h"
 

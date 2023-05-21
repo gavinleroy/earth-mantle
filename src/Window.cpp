@@ -13,7 +13,8 @@ Window::Window()
 {
     // create renderer
     this->mRenderer = vtkSmartPointer<vtkRenderer>::New();
-    mRenderer->SetBackground(.2, .2, .2);
+    vtkNew<vtkNamedColors> namedColors;
+    mRenderer->SetBackground(namedColors->GetColor3d("AliceBlue").GetData());
     mRenderer->GetActiveCamera()->SetViewUp(0, 0, 1);
     mRenderer->GetActiveCamera()->SetPosition(0, -50000, 2);
     mRenderer->UseDepthPeelingOn();
