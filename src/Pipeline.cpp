@@ -93,7 +93,7 @@ namespace Pipe {
         hull         = vtkSmartPointer<vtkSphereSource>::New();
 
         // Geometry parameters
-        int    resolution  = 100;
+        int    resolution  = 1000;
         double outerRadius = 6377;
         double innerRadius = 3486;
         double cx = 0, cy = 0, cz = 0;
