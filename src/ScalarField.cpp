@@ -7,24 +7,61 @@ ScalarField::ScalarField()
     MantleIO::MantleAttr tempAnom = MantleIO::MantleAttr::TempAnom;
     auto data = GetPointDataBeforeResample();
 
-    // Plane source
-    vtkNew<vtkPlaneSource> planeSource;
-    double radius = 7000;
-    planeSource->SetOrigin(-radius, -radius, 0);
-    planeSource->SetPoint1(2*radius,-radius, 0);
-    planeSource->SetPoint2(-radius, 2*radius, 0);
-    planeSource->SetResolution(400, 400);
+    // Geometry parameters
+    int resolution = 200;
+    double outerRadius = 6377;
+    double innerRadius = 3486;
+    double cx = 0, cy = 0, cz = 0;
+    double nx = 0, ny = 1, nz = 0;
 
-    // Core source
-    vtkNew<vtkSphereSource> coreSource;
-    coreSource->SetCenter(0, 0, 0);
-    coreSource->SetRadius(4000);
-    coreSource->SetThetaResolution(400);
-    coreSource->SetPhiResolution(400);
+
+    // Initialize the cutting plane
+    vtkNew<vtkPlane> cuttingPlane;
+    cuttingPlane->SetOrigin(cx, cy, cz);
+    cuttingPlane->SetNormal(nx, ny, nz);
+
+    // Initialize the hull
+    vtkNew<vtkSphereSource> hull;
+    hull->SetCenter(cx, cy, cz);
+    hull->SetRadius(outerRadius);
+    hull->SetThetaResolution(resolution);
+    hull->SetPhiResolution(resolution);
+
+    // Clip the hull
+    vtkNew<vtkClipPolyData> hullClipper;
+    hullClipper->SetInputConnection(hull->GetOutputPort());
+    hullClipper->SetClipFunction(cuttingPlane);
+    hullClipper->GenerateClipScalarsOn();
+
+    // Initialize the core
+    vtkNew<vtkSphereSource> core;
+    core->SetCenter(cx, cy, cz);
+    core->SetRadius(innerRadius);
+    core->SetThetaResolution(resolution);
+    core->SetPhiResolution(resolution);
+
+    // Clip the core
+    vtkNew<vtkClipPolyData> coreClipper;
+    coreClipper->SetInputConnection(core->GetOutputPort());
+    coreClipper->SetClipFunction(cuttingPlane);
+    coreClipper->GenerateClipScalarsOn();
+    coreClipper->SetInsideOut(true);
+
+    // Initialize the disk
+    vtkNew<vtkDiskSource> slice;
+    slice->SetCenter(cx, cy, cz);
+    slice->SetNormal(nx, ny, nz);
+    slice->SetInnerRadius(innerRadius);
+    slice->SetOuterRadius(outerRadius);
+    slice->SetCircumferentialResolution(resolution);
+    slice->SetRadialResolution(resolution);
 
     vtkNew<vtkAppendPolyData> appendPolyData;
-    appendPolyData->AddInputConnection(planeSource->GetOutputPort());
-    appendPolyData->AddInputConnection(coreSource->GetOutputPort());
+    appendPolyData->AddInputConnection(hullClipper->GetOutputPort());
+    appendPolyData->AddInputConnection(coreClipper->GetOutputPort());
+    appendPolyData->AddInputConnection(slice->GetOutputPort());
+    //appendPolyData->AddInputConnection(planeSource->GetOutputPort());
+    //appendPolyData->AddInputConnection(coreSource->GetOutputPort());
 
     // Gaussian kernel
     vtkNew<vtkGaussianKernel> gaussianKernel;

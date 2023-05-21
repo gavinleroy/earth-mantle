@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vtkPlaneSource.h>
+#include <vtkDiskSource.h>
 #include <vtkSphereSource.h>
 #include <vtkClipPolyData.h>
 #include <vtkAppendPolyData.h>
