@@ -96,20 +96,20 @@ void Scene::SetVolume(VolumeView idx)
 
 void Scene::InitUI(vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor)
 {   
-    std::cout << "Switch between mappings:" << std::endl;
-    std::cout << "c: Contour" << std::endl << std::endl;
-    std::cout << "l: LIConvolution" << std::endl;
+    std::cout << std::endl << "Switch between mappings:" << std::endl;
+    std::cout << "c: Contour" << std::endl;
+    std::cout << "l: LIConvolution (don't press twice)" << std::endl;
 
-    std::cout << "Toggle volume views:" << std::endl;
+    std::cout << std::endl << "Toggle volume views:" << std::endl;
     std::cout << "v: Volumes" << std::endl;
     std::cout << "i: IsoVolumes" << std::endl;
-    std::cout << "t: Tubes" << std::endl << std::endl;
+    std::cout << "t: Tubes" << std::endl;
 }
 
 void Scene::ProcessInput(std::string input)
 {
+    // Warning: CRASHES IF "l" is PRESSED TWICE (segfault)
     if (input.compare("c") == 0) SwitchMapping(EarthView::Contour);
-    // CRASHES IF PRESSED TWICE
     if (input.compare("l") == 0) SwitchMapping(EarthView::LIC);
 
     if (input.compare("v") == 0) ToggleVolume(VolumeView::Volume);
@@ -129,6 +129,9 @@ void Scene::SwitchMapping(EarthView idx)
 #endif
     renderer->RemoveAllViewProps();
     SetMapping(idx);
+    for (auto volumeIdx : this->currentEarthVolumes) {
+        SetVolume(volumeIdx);
+    }
 }
 
 void Scene::ToggleVolume(VolumeView idx)
@@ -136,8 +139,15 @@ void Scene::ToggleVolume(VolumeView idx)
 #ifndef NDEBUG
     std::cout << "SCENE: Toggling volume" << std::endl;
 #endif
-
-    SetVolume(idx);
+    std::vector<VolumeView> remainingEarthVolumes;
+    std::remove_copy(this->currentEarthVolumes.begin(),this->currentEarthVolumes.end(), std::back_inserter(remainingEarthVolumes), idx);
+    if (remainingEarthVolumes.size() == this->currentEarthVolumes.size()) {
+        remainingEarthVolumes.push_back(idx);
+        SetVolume(idx);
+    } else {
+        this->earthVolumes[idx]->RemoveFromScene(this->renderer);
+    }
+    this->currentEarthVolumes = remainingEarthVolumes;
 }
 
 void Scene::Update(double dt, double t)
