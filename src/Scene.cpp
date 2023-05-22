@@ -64,8 +64,10 @@ void Scene::InitRenderer(vtkSmartPointer<vtkRenderer> renderer)
     // TODO: lights sources, camera, etc.
     this->renderer = renderer;
 
-    if (this->currentEarthVolume.has_value())
+    if (this->currentEarthVolume.has_value()) {
         SetVolume(this->currentEarthVolume.value());
+        this->currentEarthVolumes.push_back(this->currentEarthVolume.value());
+    }
 
     if (this->currentEarthMapper.has_value())
         SetMapping(this->currentEarthMapper.value());
@@ -89,6 +91,8 @@ void Scene::SetMapping(EarthView idx)
     vtkNew<vtkActor> act;
     mapper->ConnectToActor(act);
     renderer->AddActor(act);
+
+    SetScalarBar(idx);
 }
 
 void Scene::SetVolume(VolumeView idx)
@@ -99,12 +103,14 @@ void Scene::SetVolume(VolumeView idx)
     auto volume = this->earthVolumes[idx];
     volume->SetInputConnection(this->inputPipelines);
     volume->ConnectToScene(this->renderer);
+
+    SetScalarBar(idx);
 }
 
 void Scene::InitUI(vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor)
 {
     std::cout << std::endl
-              << "Switch between mappings:" << std::endl
+              << "Switch between earth views:" << std::endl
               << "c: Contour" << std::endl
               << "l: LIConvolution (don't press twice)" << std::endl;
 
@@ -115,6 +121,11 @@ void Scene::InitUI(vtkSmartPointer<vtkRenderWindowInteractor> renderWindowIntera
               << "p: Hot plumes" << std::endl
               << "i: IsoVolumes" << std::endl
               << "t: Tubes" << std::endl;
+
+    std::cout << std::endl
+              << "b: Toggle scalar bars" << std::endl
+              << "a: Print number of actors" << std::endl
+              << "r: Remove all actors" << std::endl;
 }
 
 void Scene::ProcessInput(std::string input)
@@ -136,9 +147,18 @@ void Scene::ProcessInput(std::string input)
     if (input.compare("t") == 0)
         ToggleVolume(VolumeView::Tubes);
 
+    //toggle scalar bar
+    if (input.compare("b") == 0) {
+        ToggleScalarBars();
+    }
+    //print number of actors
     if (input.compare("a") == 0) {
         int nrOfActors = renderer->GetActors()->GetNumberOfItems();
         std::cout << "Number of actors: " << nrOfActors << std::endl;
+    }
+    //remove all actors
+    if (input.compare("r") == 0) {
+        renderer->RemoveAllViewProps();
     }
 }
 
@@ -149,6 +169,7 @@ void Scene::SwitchMapping(EarthView idx)
 #endif
     renderer->RemoveAllViewProps();
     SetMapping(idx);
+    this->currentEarthMapper = idx;
     for (auto volumeIdx : this->currentEarthVolumes) {
         SetVolume(volumeIdx);
     }
@@ -165,10 +186,53 @@ void Scene::ToggleVolume(VolumeView idx)
     if (remainingEarthVolumes.size() == this->currentEarthVolumes.size()) {
         remainingEarthVolumes.push_back(idx);
         SetVolume(idx);
-    } else
+    } else {
         this->earthVolumes[idx]->RemoveFromScene(this->renderer);
+        if (this->VolumeScalarBar == this->earthVolumes[idx]->GetScalarBar())
+            this->renderer->RemoveActor2D(this->VolumeScalarBar);
+            this->VolumeScalarBar = nullptr;
+    }
 
     this->currentEarthVolumes = remainingEarthVolumes;
+}
+
+void Scene::SetScalarBar(EarthView view)
+{
+    this->renderer->RemoveActor2D(this->EarthScalarBar);
+    vtkScalarBarActor* scalarBar = earthMappers[view]->GetScalarBar();
+    if (scalarBar == nullptr)
+        return;
+    
+    // position scalar bar to the left of the screen
+    scalarBar->SetPosition(0.01, 0.1);
+
+    this->EarthScalarBar = scalarBar;
+    this->EarthScalarBar->SetVisibility(this->scalarBarsVisible);
+    this->renderer->AddActor2D(scalarBar);
+}
+
+void Scene::SetScalarBar(VolumeView view)
+{
+    this->renderer->RemoveActor2D(this->VolumeScalarBar);
+    vtkScalarBarActor* scalarBar = earthVolumes[view]->GetScalarBar();
+    if (scalarBar == nullptr)
+        return;
+
+    // position scalar bar to the right of the screen
+    scalarBar->SetPosition(0.8, 0.1);
+
+    this->VolumeScalarBar = scalarBar;
+    this->VolumeScalarBar->SetVisibility(this->scalarBarsVisible);
+    this->renderer->AddActor2D(this->VolumeScalarBar);
+}
+
+void Scene::ToggleScalarBars()
+{
+    this->scalarBarsVisible = !this->scalarBarsVisible;
+    if (this->VolumeScalarBar != nullptr)
+        this->VolumeScalarBar->SetVisibility(this->scalarBarsVisible);
+    if (this->EarthScalarBar != nullptr)
+        this->EarthScalarBar->SetVisibility(this->scalarBarsVisible);
 }
 
 void Scene::Update(double dt, double t)

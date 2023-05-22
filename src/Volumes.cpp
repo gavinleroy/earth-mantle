@@ -46,6 +46,13 @@ void Volumes::ConstructInternal()
     colorTransferFunction->AddRGBPoint(150, 1., 1., 0.);
     colorTransferFunction->AddRGBPoint(1100, 1.0, 0., 0.);
 
+    // create a scalar bar
+    vtkNew<vtkScalarBarActor> scalarBar;
+    scalarBar->SetTitle("Volumes");
+    scalarBar->SetLookupTable(colorTransferFunction);
+    scalarBar->SetNumberOfLabels(5);
+    SetScalarBar(scalarBar);
+
     // Create a piecewise function
     vtkNew<vtkPiecewiseFunction> opacityTransferFunction;
     opacityTransferFunction->AddPoint(-1100, 0.8);

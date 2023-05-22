@@ -49,6 +49,9 @@ private:
     std::vector<VolumeView>   currentEarthVolumes;
     vtkSmartPointer<vtkActor> earthActor;
 
+    vtkSmartPointer<vtkScalarBarActor> EarthScalarBar;
+    vtkSmartPointer<vtkScalarBarActor> VolumeScalarBar;
+
     std::shared_ptr<Pipe::AllInput> inputPipelines;
 
     EarthMappings                earthMappers;
@@ -59,6 +62,11 @@ private:
     void SetMapping(EarthView idx);
     void SwitchMapping(EarthView idx);
     void ToggleVolume(VolumeView idx);
+
+    void SetScalarBar(EarthView view);
+    void SetScalarBar(VolumeView view);
+    bool scalarBarsVisible = false;
+    void ToggleScalarBars();
 
 public:
     Scene();

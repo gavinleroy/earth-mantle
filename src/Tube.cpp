@@ -42,6 +42,12 @@ void Tube::ConstructInternal()
     ctf->SetValueRange(1, 1);
     ctf->SetSaturationRange(0.5, 0.5);
 
+    // create a scalar bar
+    vtkNew<vtkScalarBarActor> scalarBar;
+    scalarBar->SetTitle("Tubes");
+    scalarBar->SetLookupTable(ctf);
+    SetScalarBar(scalarBar);
+
     // Line Seed
     // vtkNew<vtkLineSource> line;
     // line->SetResolution(1000);

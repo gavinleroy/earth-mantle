@@ -14,6 +14,7 @@
 #include <vtkSphereSource.h>
 #include <vtkImplicitSelectionLoop.h>
 #include <vtkNamedColors.h>
+#include <vtkScalarBarActor.h>
 
 #include "Scene.h"
 

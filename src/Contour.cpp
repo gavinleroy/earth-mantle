@@ -158,6 +158,13 @@ void Contour::ConstructInternal()
             true, false
     );
 
+    // create a scalar bar
+    vtkNew<vtkScalarBarActor> scalarBar;
+    scalarBar->SetLookupTable(colorTransferFunction);
+    scalarBar->SetTitle("Contour");
+    SetScalarBar(scalarBar);
+        
+
     mapper->SelectColorArray(property.c_str());
     mapper->SetScalarVisibility(true);
     mapper->SetScalarModeToUsePointFieldData();

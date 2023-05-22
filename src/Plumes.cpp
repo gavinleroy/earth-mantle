@@ -21,6 +21,12 @@ void Plumes::ConstructInternal()
     colorTransferFunction->AddRGBPoint(150, 1., 1., 0.);
     colorTransferFunction->AddRGBPoint(1100, 1.0, 0., 0.);
 
+    // create a scalar bar
+    vtkNew<vtkScalarBarActor> scalarBar;
+    scalarBar->SetTitle("Plumes");
+    scalarBar->SetLookupTable(colorTransferFunction);
+    SetScalarBar(scalarBar);
+
     isosurface->GenerateValues(numContours, lowerBound, upperBound);
 
     vtkNew<vtkSmoothPolyDataFilter> smoothie;

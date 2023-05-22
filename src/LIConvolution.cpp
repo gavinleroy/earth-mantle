@@ -54,6 +54,12 @@ void LIConvolution::ConstructInternal()
 //    colorTransferFunction->AddRGBPoint(1.5, 0.5, 0.5, 1.);
 //    colorTransferFunction->AddRGBPoint(2, 0.5, 0., 0.7);
 
+    // create a scalar bar
+    vtkNew<vtkScalarBarActor> scalarBar;
+    scalarBar->SetLookupTable(colorTransferFunction);
+    scalarBar->SetTitle("LIC");
+    SetScalarBar(scalarBar);
+
     // mapper->SetInputConnection(geometry->GetOutputPort());
     mapper->SetInputArrayToProcess(0, 0, 0, vtkDataObject::POINT, "velocity");
     mapper->GetLICInterface()->SetEnhancedLIC(0);  // Disable enhanced LIC (for now)
