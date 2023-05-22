@@ -101,6 +101,7 @@
 #include <vtkGaussianKernel.h>
 #include <vtkPointInterpolator.h>
 #include <vtkBox.h>
+#include <vtkScalarBarActor.h>
 
 #include <sstream>
 #include <optional>
@@ -140,19 +141,29 @@ namespace Pipe {
 
     // Represents classes that work on the earth itself. LIC, contours, etc ...
     class ActorMapped : public InputPipeline {
+    private:
+        vtkSmartPointer<vtkScalarBarActor>  m_scalarBar;
     public:
         virtual ~ActorMapped() { }
 
         virtual void ConnectToActor(vtkSmartPointer<vtkActor> actor) = 0;
+        
+        void SetScalarBar(vtkSmartPointer<vtkScalarBarActor> scalarBar) { m_scalarBar = scalarBar; }
+        vtkSmartPointer<vtkScalarBarActor>  GetScalarBar() const { return m_scalarBar; }
     };
 
     // Represents classes that
     class VolumeMapped : public InputPipeline {
+    private:
+        vtkSmartPointer<vtkScalarBarActor>  m_scalarBar;
     public:
         virtual ~VolumeMapped() { }
 
         virtual void ConnectToScene(vtkSmartPointer<vtkRenderer> renderer)  = 0;
         virtual void RemoveFromScene(vtkSmartPointer<vtkRenderer> renderer) = 0;
+
+        void SetScalarBar(vtkSmartPointer<vtkScalarBarActor> scalarBar) { m_scalarBar = scalarBar; }
+        vtkSmartPointer<vtkScalarBarActor>  GetScalarBar() const { return m_scalarBar; }
     };
 }
 

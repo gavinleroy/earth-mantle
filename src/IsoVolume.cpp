@@ -22,6 +22,12 @@ void IsoVolume::ConstructInternal()
     colorTransferFunction->AddRGBPoint(150, 1., 1., 0.);
     colorTransferFunction->AddRGBPoint(1100, 1.0, 0., 0.);
 
+    // create a scalar bar
+    vtkNew<vtkScalarBarActor> scalarBar;
+    scalarBar->SetTitle("IsoVolume");
+    scalarBar->SetLookupTable(colorTransferFunction);
+    SetScalarBar(scalarBar);
+
     vtkNew<vtkPiecewiseFunction> opacityTransferFunction;
     opacityTransferFunction->AddPoint(-1100, 1.0);
     opacityTransferFunction->AddPoint(-151, 1.0);
