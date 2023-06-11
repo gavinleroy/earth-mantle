@@ -62,7 +62,7 @@ void LIConvolution::ConstructInternal()
 
     // mapper->SetInputConnection(geometry->GetOutputPort());
     mapper->SetInputArrayToProcess(0, 0, 0, vtkDataObject::POINT, "velocity");
-    mapper->GetLICInterface()->SetEnhancedLIC(0);  // Disable enhanced LIC (for now)
+    mapper->GetLICInterface()->SetEnhancedLIC(1);  // Enable enhanced LIC
 
     mapper->SelectColorArray("velocity");
     mapper->SetScalarVisibility(true);
